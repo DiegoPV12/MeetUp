@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../viewmodels/register_viewmodel.dart';
 
 class RegisterView extends StatelessWidget {
-  RegisterView({Key? key}) : super(key: key);
+  RegisterView({super.key});
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();

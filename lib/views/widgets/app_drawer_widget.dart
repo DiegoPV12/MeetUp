@@ -4,7 +4,7 @@ import '../../viewmodels/auth_viewmodel.dart';
 import '../../viewmodels/user_viewmodel.dart';
 
 class AppDrawerWidget extends StatefulWidget {
-  const AppDrawerWidget({Key? key}) : super(key: key);
+  const AppDrawerWidget({super.key});
 
   @override
   State<AppDrawerWidget> createState() => _AppDrawerWidgetState();

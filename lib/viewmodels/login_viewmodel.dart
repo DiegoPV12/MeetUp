@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/login_request_model.dart';
-import '../models/login_response_model.dart';
 import '../services/auth_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 

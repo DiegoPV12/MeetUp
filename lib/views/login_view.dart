@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../viewmodels/login_viewmodel.dart';
 
 class LoginView extends StatelessWidget {
-  LoginView({Key? key}) : super(key: key);
+  LoginView({super.key});
 
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();

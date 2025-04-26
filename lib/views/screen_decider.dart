@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../viewmodels/decider_viewmodel.dart';
 
 class ScreenDecider extends StatefulWidget {
-  const ScreenDecider({Key? key}) : super(key: key);
+  const ScreenDecider({super.key});
 
   @override
   State<ScreenDecider> createState() => _ScreenDeciderState();
