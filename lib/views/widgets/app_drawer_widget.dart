@@ -60,22 +60,27 @@ class _AppDrawerWidgetState extends State<AppDrawerWidget> {
             leading: const Icon(Icons.logout),
             title: const Text('Cerrar sesión'),
             onTap: () async {
-              final rootContext =
-                  Navigator.of(context).context; // Capturamos contexto seguro
+              final rootContext = Navigator.of(context).context;
 
               final shouldLogout = await _showLogoutConfirmation(rootContext);
               if (shouldLogout) {
-                Navigator.of(context).pop(); // Cierra el Drawer
-                await Future.delayed(
-                  const Duration(milliseconds: 300),
-                ); // Espera
-                await authViewModel.logout(); // Borra token
+                Navigator.of(context).pop();
+                await Future.delayed(const Duration(milliseconds: 300));
+                await authViewModel.logout();
                 Navigator.pushNamedAndRemoveUntil(
                   rootContext,
                   '/',
                   (route) => false,
-                ); // Redirige a login
+                );
               }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.event),
+            title: const Text('Lista de eventos'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/events');
             },
           ),
         ],

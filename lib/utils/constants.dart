@@ -6,6 +6,7 @@ class Constants {
   static const String loginUrl = '$baseUrl/api/users/login';
   static const String registerUrl = '$baseUrl/api/users/register';
   static const String meUrl = '$baseUrl/api/users/me';
+  static const String events = '$baseUrl/api/users/me';
 
   // Headers comunes
   static const Map<String, String> jsonHeaders = {
