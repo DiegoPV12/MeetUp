@@ -66,8 +66,8 @@ class EventDetailView extends StatelessWidget {
                   (event.imageUrl != null && event.imageUrl!.isNotEmpty)
                       ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          event.imageUrl!,
+                        child: Image.asset(
+                          'assets/images/${event.imageUrl!}',
                           width: double.infinity,
                           height: 200,
                           fit: BoxFit.cover,

@@ -84,7 +84,7 @@ class _ListEventsViewState extends State<ListEventsView> {
                     itemBuilder: (ctx, i) {
                       return NextEventCard(
                         event: evm.events[i],
-                        imagePath: 'assets/images/event_placeholder.png',
+                        imagePath: 'assets/images/1.png',
                       );
                     },
                   ),

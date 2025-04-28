@@ -4,7 +4,8 @@ class EventRequest {
   final String location;
   final String category;
   final DateTime startTime;
-  final DateTime endTime;
+  final DateTime? endTime;
+  final String imageUrl;
 
   EventRequest({
     required this.name,
@@ -12,15 +13,24 @@ class EventRequest {
     required this.location,
     required this.category,
     required this.startTime,
-    required this.endTime,
+    this.endTime,
+    required this.imageUrl,
   });
 
-  Map<String, dynamic> toJson() => {
-    'name': name,
-    'description': description,
-    'location': location,
-    'category': category,
-    'startTime': startTime.toIso8601String(),
-    'endTime': endTime.toIso8601String(),
-  };
+  Map<String, dynamic> toJson() {
+    final data = {
+      'name': name,
+      'description': description,
+      'location': location,
+      'category': category,
+      'startTime': startTime.toIso8601String(),
+      'imageUrl': imageUrl,
+    };
+
+    if (endTime != null) {
+      data['endTime'] = endTime!.toIso8601String();
+    }
+
+    return data;
+  }
 }

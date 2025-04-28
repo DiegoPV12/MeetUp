@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meetup/views/widgets/create_event/event_image_selector.dart';
 import '../../../viewmodels/event_viewmodel.dart';
 import 'event_category_dropdown.dart';
 import 'event_datetime_picker.dart';
@@ -20,6 +21,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
   final _locationController = TextEditingController();
 
   String? _selectedCategory;
+  String? _selectedImage;
   DateTime? _selectedDate;
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
@@ -81,6 +83,15 @@ class _CreateEventFormState extends State<CreateEventForm> {
               });
             },
           ),
+          const SizedBox(height: 24),
+          EventImageSelector(
+            selectedImage: _selectedImage,
+            onImageSelected: (imageName) {
+              setState(() {
+                _selectedImage = imageName;
+              });
+            },
+          ),
           const SizedBox(height: 32),
           widget.eventViewModel.isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -127,8 +138,8 @@ class _CreateEventFormState extends State<CreateEventForm> {
     if (_formKey.currentState!.validate() &&
         _selectedDate != null &&
         _startTime != null &&
-        _endTime != null &&
-        _selectedCategory != null) {
+        _selectedCategory != null &&
+        _selectedImage != null) {
       final startDateTime = DateTime(
         _selectedDate!.year,
         _selectedDate!.month,
@@ -136,21 +147,25 @@ class _CreateEventFormState extends State<CreateEventForm> {
         _startTime!.hour,
         _startTime!.minute,
       );
-      final endDateTime = DateTime(
-        _selectedDate!.year,
-        _selectedDate!.month,
-        _selectedDate!.day,
-        _endTime!.hour,
-        _endTime!.minute,
-      );
 
-      if (endDateTime.isBefore(startDateTime)) {
-        showMessage(
-          context,
-          'La hora de fin debe ser después de la hora de inicio',
-          isError: true,
+      DateTime? endDateTime;
+      if (_endTime != null) {
+        endDateTime = DateTime(
+          _selectedDate!.year,
+          _selectedDate!.month,
+          _selectedDate!.day,
+          _endTime!.hour,
+          _endTime!.minute,
         );
-        return;
+
+        if (endDateTime.isBefore(startDateTime)) {
+          showMessage(
+            context,
+            'La hora de fin debe ser después de la hora de inicio',
+            isError: true,
+          );
+          return;
+        }
       }
 
       try {
@@ -160,7 +175,8 @@ class _CreateEventFormState extends State<CreateEventForm> {
           location: _locationController.text.trim(),
           category: _selectedCategory!,
           startTime: startDateTime,
-          endTime: endDateTime,
+          endTime: endDateTime, // <-- Puede ser null
+          imageUrl: _selectedImage!,
         );
         showMessage(context, 'Evento creado exitosamente');
         Navigator.pushNamedAndRemoveUntil(context, '/events', (route) => false);

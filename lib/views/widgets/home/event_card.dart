@@ -14,7 +14,7 @@ class EventCard extends StatelessWidget {
   const EventCard({
     super.key,
     required this.event,
-    this.imagePath = 'assets/images/event_placeholder.png',
+    this.imagePath = 'assets/images/4.png',
     this.width,
     this.height,
   });
@@ -58,7 +58,7 @@ class EventCard extends StatelessWidget {
                     imagePath,
                     height: height ?? 160,
                     width: double.infinity,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fitWidth,
                   ),
                 ),
                 Positioned(

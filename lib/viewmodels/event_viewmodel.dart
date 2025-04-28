@@ -18,7 +18,8 @@ class EventViewModel extends ChangeNotifier {
     required String location,
     required String category,
     required DateTime startTime,
-    required DateTime endTime,
+    DateTime? endTime, // <-- Ahora opcional
+    required String imageUrl, // <-- Ahora requerido
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -30,7 +31,8 @@ class EventViewModel extends ChangeNotifier {
         location: location,
         category: category,
         startTime: startTime,
-        endTime: endTime,
+        endTime: endTime, // <-- Puede ser null
+        imageUrl: imageUrl, // <-- Se envía el nombre de imagen
       );
       await _eventService.createEvent(eventRequest);
     } catch (e) {
