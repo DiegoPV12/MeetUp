@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../viewmodels/event_viewmodel.dart';
+import '../../../viewmodels/event_viewmodel.dart';
 import 'event_category_dropdown.dart';
 import 'event_datetime_picker.dart';
 import 'event_message_helper.dart';

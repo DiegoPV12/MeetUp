@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../viewmodels/event_viewmodel.dart';
-import 'create_event_form.dart';
+import '../viewmodels/event_viewmodel.dart';
+import 'widgets/create_event/create_event_form.dart';
 
 class CreateEventView extends StatelessWidget {
   const CreateEventView({super.key});

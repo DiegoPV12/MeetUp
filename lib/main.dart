@@ -6,7 +6,7 @@ import 'package:meetup/viewmodels/decider_viewmodel.dart';
 import 'package:meetup/viewmodels/event_viewmodel.dart';
 import 'package:meetup/viewmodels/user_viewmodel.dart';
 import 'package:meetup/views/choose_event_creation_view.dart';
-import 'package:meetup/views/create_event/create_event_view.dart';
+import 'package:meetup/views/create_event_view.dart';
 import 'package:meetup/views/create_from_template_view.dart';
 import 'package:meetup/views/list_events_view.dart';
 import 'package:provider/provider.dart';

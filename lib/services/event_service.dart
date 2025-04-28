@@ -13,7 +13,7 @@ class EventService {
     if (token == null) throw Exception('No hay token');
 
     final response = await http.post(
-      Uri.parse('${Constants.baseUrl}/api/events'),
+      Uri.parse(Constants.events),
       headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
       body: jsonEncode(eventRequest.toJson()),
     );
@@ -28,7 +28,7 @@ class EventService {
     if (token == null) throw Exception('No hay token');
 
     final response = await http.get(
-      Uri.parse('${Constants.baseUrl}/api/events'),
+      Uri.parse(Constants.events),
       headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
     );
 
@@ -37,6 +37,52 @@ class EventService {
       return data.map((json) => EventModel.fromJson(json)).toList();
     } else {
       throw Exception('Error al obtener eventos');
+    }
+  }
+
+  Future<EventModel> fetchEventById(String eventId) async {
+    final token = await _storage.read(key: 'jwt_token');
+    if (token == null) throw Exception('No hay token');
+
+    final response = await http.get(
+      Uri.parse('${Constants.events}/$eventId'),
+      headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> decoded = json.decode(response.body);
+      final Map<String, dynamic> data = decoded['data'];
+      return EventModel.fromJson(data);
+    } else {
+      throw Exception('Error al cargar evento');
+    }
+  }
+
+  Future<void> deleteEvent(String eventId) async {
+    final token = await _storage.read(key: 'jwt_token');
+    if (token == null) throw Exception('No hay token');
+
+    final response = await http.delete(
+      Uri.parse('${Constants.events}/$eventId'),
+      headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Error al eliminar evento');
+    }
+  }
+
+  Future<void> cancelEvent(String eventId) async {
+    final token = await _storage.read(key: 'jwt_token');
+    if (token == null) throw Exception('No hay token');
+
+    final response = await http.patch(
+      Uri.parse('${Constants.events}/$eventId/cancel'),
+      headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Error al cancelar evento');
     }
   }
 }

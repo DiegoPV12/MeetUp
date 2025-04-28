@@ -26,8 +26,9 @@ class EventCard extends StatelessWidget {
     final dayLabel = DateFormat('d').format(event.startTime);
     final monthLabel = DateFormat('MMM').format(event.startTime).toUpperCase();
     final timeLabel =
-        '${DateFormat('hh:mm a').format(event.startTime)} – '
-        '${DateFormat('hh:mm a').format(event.endTime)}';
+        event.endTime != null
+            ? '${DateFormat('hh:mm a').format(event.startTime)} – ${DateFormat('hh:mm a').format(event.endTime!)}'
+            : DateFormat('hh:mm a').format(event.startTime);
 
     Widget card = Container(
       decoration: BoxDecoration(

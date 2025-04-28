@@ -5,7 +5,10 @@ class EventModel {
   final String location;
   final String category;
   final DateTime startTime;
-  final DateTime endTime;
+  final DateTime? endTime;
+  final String? imageUrl; // Ahora opcional
+  final String createdBy;
+  final bool? isCancelled; // Ahora opcional
 
   EventModel({
     required this.id,
@@ -14,10 +17,14 @@ class EventModel {
     required this.location,
     required this.category,
     required this.startTime,
-    required this.endTime,
+    this.endTime,
+    this.imageUrl, // Opcional
+    required this.createdBy,
+    this.isCancelled, // Opcional
   });
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
+    print('Recibiendo json del evento: $json');
     return EventModel(
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
@@ -25,7 +32,10 @@ class EventModel {
       location: json['location'] ?? '',
       category: json['category'] ?? '',
       startTime: DateTime.parse(json['startTime']),
-      endTime: DateTime.parse(json['endTime']),
+      endTime: json['endTime'] != null ? DateTime.parse(json['endTime']) : null,
+      imageUrl: json['imageUrl'],
+      createdBy: json['createdBy'] ?? '',
+      isCancelled: json['isCancelled'],
     );
   }
 }
