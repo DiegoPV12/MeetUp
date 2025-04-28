@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:device_preview/device_preview.dart';
+import 'package:meetup/theme/theme.dart';
 import 'package:meetup/viewmodels/auth_viewmodel.dart';
 import 'package:meetup/viewmodels/decider_viewmodel.dart';
 import 'package:meetup/viewmodels/event_viewmodel.dart';
@@ -16,7 +18,7 @@ import 'views/home_view.dart';
 import 'views/screen_decider.dart';
 
 void main() {
-  runApp(const MeetUpApp());
+  runApp(DevicePreview(enabled: true, builder: (context) => const MeetUpApp()));
 }
 
 class MeetUpApp extends StatelessWidget {
@@ -34,6 +36,11 @@ class MeetUpApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => EventViewModel()),
       ],
       child: MaterialApp(
+        // Device Preview settings
+        builder: DevicePreview.appBuilder,
+        useInheritedMediaQuery: true,
+
+        theme: AppTheme.lightTheme,
         title: 'MeetUp',
         debugShowCheckedModeBanner: false,
         initialRoute: '/decider',

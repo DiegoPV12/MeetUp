@@ -1,20 +1,107 @@
+// lib/views/home_view.dart
 import 'package:flutter/material.dart';
 import 'package:meetup/views/widgets/app_drawer_widget.dart';
+import 'package:meetup/views/widgets/bottom_navbar.dart';
+import 'package:meetup/views/widgets/home/searchbar.dart';
+import 'package:meetup/views/widgets/home/section_title.dart';
+import 'package:meetup/views/widgets/home/event_section.dart';
+import 'package:meetup/views/widgets/home/action_card.dart';
+import 'package:meetup/theme/theme.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/auth_viewmodel.dart';
+import '../viewmodels/event_viewmodel.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
   @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  int _navIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<EventViewModel>(context, listen: false).fetchEvents();
+    });
+  }
+
+  void _handleNavTap(int index) {
+    setState(() => _navIndex = index);
+    switch (index) {
+      case 0:
+        // Ya estamos en Home
+        break;
+      case 1:
+        break;
+      case 2:
+        break;
+      case 3:
+        // TODO: ruta de notificaciones
+        // Navigator.pushNamed(context, '/notifications');
+        break;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    Provider.of<AuthViewModel>(context, listen: false);
+    final tt = Theme.of(context).textTheme;
+    final evm = Provider.of<EventViewModel>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Inicio')),
+      extendBody: true, // para que el BottomNavBar curve sobre el body
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text('MeetUp', style: tt.headlineMedium),
+        actions: [
+          Builder(
+            builder: (ctx) {
+              return IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => Scaffold.of(ctx).openDrawer(),
+              );
+            },
+          ),
+        ],
+      ),
       drawer: const AppDrawerWidget(),
-      body: const Center(
-        child: Text('¡Bienvenido a MeetUp!', style: TextStyle(fontSize: 24)),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.horizontalMargin,
+            vertical: Spacing.verticalMargin,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SearchBarPlaceholder(),
+              const SizedBox(height: Spacing.spacingLarge),
+
+              const SectionTitle('Próximos Eventos🎉'),
+              const SizedBox(height: Spacing.spacingMedium),
+              EventSection(isLoading: evm.isLoading, events: evm.events),
+              const SizedBox(height: Spacing.spacingXLarge),
+
+              ActionCard(
+                title: 'Crea un Evento!',
+                subtitle: 'Tus primeros pasos',
+                buttonLabel: 'CREAR',
+                onPressed:
+                    () =>
+                        Navigator.pushNamed(context, '/choose-event-creation'),
+                backgroundColor:
+                    Theme.of(context).colorScheme.secondaryContainer,
+                imagePath: 'assets/images/create_event.png',
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: _navIndex,
+        onTap: _handleNavTap,
       ),
     );
   }

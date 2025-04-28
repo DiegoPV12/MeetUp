@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/login_viewmodel.dart';
+import 'package:meetup/theme/theme.dart';
 
-class LoginView extends StatelessWidget {
-  LoginView({super.key});
+class LoginView extends StatefulWidget {
+  const LoginView({super.key});
 
+  @override
+  State<LoginView> createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<LoginView> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
+  bool _obscure = true;
 
-  void _showError(BuildContext context, String message) {
+  void _showError(String message) {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
@@ -17,90 +24,181 @@ class LoginView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = Provider.of<LoginViewModel>(context);
+    final vm = Provider.of<LoginViewModel>(context);
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'MeetUp',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 32),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.email),
+          padding: EdgeInsets.fromLTRB(
+            Spacing.horizontalMargin,
+            Spacing.verticalMargin,
+            Spacing.horizontalMargin,
+            Spacing.spacingXXLarge * 2,
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Form(
+              key: _formKey, //
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Gorro
+                  Center(
+                    child: Image.asset(
+                      'assets/images/partyhat.png',
+                      width: 100,
+                      height: 100,
+                    ),
                   ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'El email es obligatorio';
-                    }
-                    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-                    if (!emailRegex.hasMatch(value.trim())) {
-                      return 'Ingresa un email válido';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Contraseña',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock),
+
+                  const SizedBox(height: Spacing.spacingSmall),
+
+                  // Título
+                  Center(child: Text('MeetUp!', style: tt.headlineLarge)),
+
+                  const SizedBox(height: Spacing.spacingSmall),
+
+                  // Slogan
+                  Text(
+                    '¡Celebra a tu manera!',
+                    style: tt.bodyLarge!.copyWith(
+                      fontStyle: FontStyle.italic,
+                      color: cs.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'La contraseña es obligatoria';
-                    }
-                    if (value.trim().length < 6) {
-                      return 'La contraseña debe tener al menos 6 caracteres';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                viewModel.isLoading
-                    ? const CircularProgressIndicator()
-                    : SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            try {
-                              await viewModel.login(
-                                _emailController.text.trim(),
-                                _passwordController.text.trim(),
-                              );
-                              Navigator.pushReplacementNamed(context, '/home');
-                            } catch (e) {
-                              _showError(context, 'Error al iniciar sesión');
-                            }
-                          }
-                        },
-                        child: const Text('Iniciar sesión'),
+
+                  const SizedBox(height: Spacing.spacingXXLarge),
+
+                  // Email
+                  TextFormField(
+                    controller: _emailCtrl,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      hintText: 'abc@email.com',
+                      prefixIcon: Icon(
+                        Icons.email_outlined,
+                        color: cs.onSurface,
                       ),
                     ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/register');
-                  },
-                  child: const Text('¿No tienes cuenta? Regístrate aquí'),
-                ),
-              ],
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) {
+                        return 'El email es obligatorio';
+                      }
+                      final re = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+                      if (!re.hasMatch(v.trim())) {
+                        return 'Ingresa un email válido';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: Spacing.spacingMedium),
+
+                  // Contraseña
+                  TextFormField(
+                    controller: _passwordCtrl,
+                    obscureText: _obscure,
+                    decoration: InputDecoration(
+                      hintText: 'Contraseña',
+                      prefixIcon: Icon(
+                        Icons.lock_outlined,
+                        color: cs.onSurface,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscure
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: cs.onSurface,
+                        ),
+                        onPressed: () => setState(() => _obscure = !_obscure),
+                      ),
+                    ),
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) {
+                        return 'La contraseña es obligatoria';
+                      }
+                      if (v.trim().length < 6) {
+                        return 'Debe tener al menos 6 caracteres';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: Spacing.spacingXXLarge),
+
+                  // Botón principal con spinner interno
+                  FilledButton(
+                    onPressed:
+                        vm.isLoading
+                            ? null
+                            : () async {
+                              if (_formKey.currentState!.validate()) {
+                                try {
+                                  await vm.login(
+                                    _emailCtrl.text.trim(),
+                                    _passwordCtrl.text.trim(),
+                                  );
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    '/home',
+                                  );
+                                } catch (_) {
+                                  _showError('Error al iniciar sesión');
+                                }
+                              }
+                            },
+                    child:
+                        vm.isLoading
+                            ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                            : Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Text('INICIAR SESIÓN'),
+                                SizedBox(width: 8),
+                                Icon(Icons.arrow_forward),
+                              ],
+                            ),
+                  ),
+
+                  const SizedBox(height: Spacing.spacingMedium),
+
+                  // Ir a registro
+                  Center(
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed:
+                            () => Navigator.pushNamed(context, '/register'),
+                        child: Text.rich(
+                          TextSpan(
+                            text: 'REGÍSTRATE',
+                            style: tt.bodyMedium!.copyWith(
+                              color: cs.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Espacio extra abajo
+                  const SizedBox(height: Spacing.spacingXXLarge),
+                ],
+              ),
             ),
           ),
         ),
