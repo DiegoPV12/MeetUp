@@ -72,17 +72,24 @@ class EventService {
     }
   }
 
-  Future<void> cancelEvent(String eventId) async {
+  Future<void> toggleCancelEvent(
+    String eventId, {
+    required bool isCurrentlyCancelled,
+  }) async {
     final token = await _storage.read(key: 'jwt_token');
     if (token == null) throw Exception('No hay token');
 
+    final endpoint = isCurrentlyCancelled ? 'uncancel' : 'cancel';
+
     final response = await http.patch(
-      Uri.parse('${Constants.events}/$eventId/cancel'),
+      Uri.parse('${Constants.events}/$eventId/$endpoint'),
       headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Error al cancelar evento');
+      throw Exception(
+        'Error al ${isCurrentlyCancelled ? 'reactivar' : 'cancelar'} evento',
+      );
     }
   }
 }

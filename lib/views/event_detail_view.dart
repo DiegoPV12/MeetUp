@@ -147,29 +147,42 @@ class EventDetailView extends StatelessWidget {
                         onPressed: () async {
                           final confirm = await _showConfirmationDialog(
                             context,
-                            '¿Deseas cancelar este evento?',
+                            event.isCancelled == true
+                                ? '¿Deseas reactivar este evento?'
+                                : '¿Deseas cancelar este evento?',
                           );
                           if (confirm) {
                             try {
-                              await viewModel.cancelEvent(event.id);
+                              await viewModel.toggleCancelEvent(
+                                event.id,
+                                isCurrentlyCancelled:
+                                    event.isCancelled ?? false,
+                              );
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Evento cancelado'),
+                                SnackBar(
+                                  content: Text(
+                                    event.isCancelled == true
+                                        ? 'Evento reactivado'
+                                        : 'Evento cancelado',
+                                  ),
                                 ),
                               );
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Error al cancelar evento'),
+                                  content: Text('Error al actualizar estado'),
                                 ),
                               );
                             }
                           }
                         },
-                        icon: const Icon(Icons.cancel),
-                        label: const Text('Cancelar'),
+                        icon: Icon(
+                          event.isCancelled == true ? Icons.undo : Icons.cancel,
+                        ),
+                        label: Text(
+                          event.isCancelled == true ? 'Reactivar' : 'Cancelar',
+                        ),
                       ),
-
                       ElevatedButton.icon(
                         onPressed: () async {
                           final confirm = await _showConfirmationDialog(

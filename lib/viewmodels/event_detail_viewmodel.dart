@@ -29,8 +29,29 @@ class EventDetailViewModel extends ChangeNotifier {
     await _eventService.deleteEvent(eventId);
   }
 
-  Future<void> cancelEvent(String eventId) async {
-    await _eventService.cancelEvent(eventId);
-    await fetchEventDetail(eventId);
+  Future<void> toggleCancelEvent(
+    String eventId, {
+    required bool isCurrentlyCancelled,
+  }) async {
+    await _eventService.toggleCancelEvent(
+      eventId,
+      isCurrentlyCancelled: isCurrentlyCancelled,
+    );
+
+    if (_event != null && _event!.id == eventId) {
+      _event = EventModel(
+        id: _event!.id,
+        name: _event!.name,
+        description: _event!.description,
+        location: _event!.location,
+        category: _event!.category,
+        startTime: _event!.startTime,
+        endTime: _event!.endTime,
+        imageUrl: _event!.imageUrl,
+        createdBy: _event!.createdBy,
+        isCancelled: !isCurrentlyCancelled,
+      );
+      notifyListeners();
+    }
   }
 }
