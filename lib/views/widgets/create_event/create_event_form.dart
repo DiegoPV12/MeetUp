@@ -179,7 +179,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
           imageUrl: _selectedImage!,
         );
         showMessage(context, 'Evento creado exitosamente');
-        Navigator.pushNamedAndRemoveUntil(context, '/events', (route) => false);
+        Navigator.pop(context, true);
       } catch (e) {
         showMessage(context, 'Error al crear el evento', isError: true);
       }

@@ -38,7 +38,13 @@ class EventDetailView extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => EventDetailViewModel()..fetchEventDetail(eventId),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Detalles del Evento')),
+        appBar: AppBar(
+          title: const Text('Detalles del Evento'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ),
         body: Consumer<EventDetailViewModel>(
           builder: (context, viewModel, _) {
             if (viewModel.isLoading) {
@@ -133,12 +139,19 @@ class EventDetailView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.pushNamed(
+                        onPressed: () async {
+                          final updated = await Navigator.pushNamed(
                             context,
                             '/edit-event',
                             arguments: event.id,
                           );
+
+                          if (updated == true && context.mounted) {
+                            Provider.of<EventDetailViewModel>(
+                              context,
+                              listen: false,
+                            ).fetchEventDetail(event.id);
+                          }
                         },
                         icon: const Icon(Icons.edit),
                         label: const Text('Editar'),
@@ -197,11 +210,7 @@ class EventDetailView extends StatelessWidget {
                                   content: Text('Evento eliminado'),
                                 ),
                               );
-                              Navigator.pushNamedAndRemoveUntil(
-                                context,
-                                '/events',
-                                (route) => false,
-                              );
+                              Navigator.pop(context, true);
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(

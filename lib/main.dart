@@ -8,6 +8,8 @@ import 'package:meetup/viewmodels/user_viewmodel.dart';
 import 'package:meetup/views/choose_event_creation_view.dart';
 import 'package:meetup/views/create_event_view.dart';
 import 'package:meetup/views/create_from_template_view.dart';
+import 'package:meetup/views/edit_event_view.dart';
+import 'package:meetup/views/event_detail_view.dart';
 import 'package:meetup/views/list_events_view.dart';
 import 'package:provider/provider.dart';
 import 'viewmodels/login_viewmodel.dart';
@@ -54,6 +56,16 @@ class MeetUpApp extends StatelessWidget {
           '/create-event': (context) => const CreateEventView(),
           '/create-from-template': (context) => const CreateFromTemplateView(),
           '/events': (context) => const ListEventsView(),
+          '/event-detail': (context) {
+            final eventId =
+                ModalRoute.of(context)!.settings.arguments as String;
+            return EventDetailView(eventId: eventId);
+          },
+          '/edit-event': (context) {
+            final eventId =
+                ModalRoute.of(context)!.settings.arguments as String;
+            return EditEventView(eventId: eventId);
+          },
         },
       ),
     );

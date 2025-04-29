@@ -92,4 +92,22 @@ class EventService {
       );
     }
   }
+
+  Future<void> updateEvent(
+    String eventId,
+    Map<String, dynamic> updatedData,
+  ) async {
+    final token = await _storage.read(key: 'jwt_token');
+    if (token == null) throw Exception('No hay token');
+
+    final response = await http.put(
+      Uri.parse('${Constants.events}/$eventId'),
+      headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
+      body: jsonEncode(updatedData),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Error al actualizar evento');
+    }
+  }
 }

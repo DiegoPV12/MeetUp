@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:meetup/models/event_model.dart';
 import 'package:meetup/theme/theme.dart';
-import 'package:meetup/views/event_detail_view.dart';
+import 'package:meetup/viewmodels/event_viewmodel.dart';
+import 'package:provider/provider.dart';
 
 class NextEventCard extends StatelessWidget {
   final EventModel event;
@@ -26,11 +27,16 @@ class NextEventCard extends StatelessWidget {
             : DateFormat('hh:mm a').format(event.startTime);
 
     return InkWell(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        final updated = await Navigator.pushNamed(
           context,
-          MaterialPageRoute(builder: (_) => EventDetailView(eventId: event.id)),
+          '/event-detail',
+          arguments: event.id,
         );
+
+        if (updated == true && context.mounted) {
+          Provider.of<EventViewModel>(context, listen: false).fetchEvents();
+        }
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
