@@ -1,11 +1,11 @@
 // lib/views/home_view.dart
 import 'package:flutter/material.dart';
-import 'package:meetup/views/widgets/app_drawer_widget.dart';
-import 'package:meetup/views/widgets/bottom_navbar.dart';
-import 'package:meetup/views/widgets/home/searchbar.dart';
-import 'package:meetup/views/widgets/home/section_title.dart';
-import 'package:meetup/views/widgets/home/event_section.dart';
-import 'package:meetup/views/widgets/home/action_card.dart';
+import 'package:meetup/widgets/shared/app_drawer_widget.dart';
+import 'package:meetup/widgets/shared/bottom_navbar.dart';
+import 'package:meetup/widgets/home/searchbar.dart';
+import 'package:meetup/widgets/home/section_title.dart';
+import 'package:meetup/widgets/home/event_section.dart';
+import 'package:meetup/widgets/home/action_card.dart';
 import 'package:meetup/theme/theme.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/event_viewmodel.dart';

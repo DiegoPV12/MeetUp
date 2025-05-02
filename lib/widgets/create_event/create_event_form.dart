@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:meetup/views/widgets/create_event/event_image_selector.dart';
-import '../../../viewmodels/event_viewmodel.dart';
+import 'package:meetup/widgets/create_event/event_image_selector.dart';
+import '../../viewmodels/event_viewmodel.dart';
 import 'event_category_dropdown.dart';
 import 'event_datetime_picker.dart';
 import 'event_message_helper.dart';

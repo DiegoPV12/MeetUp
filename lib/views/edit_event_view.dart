@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:meetup/viewmodels/edit_event_viewmodel.dart';
-import 'package:meetup/views/widgets/create_event/event_category_dropdown.dart';
-import 'package:meetup/views/widgets/create_event/event_datetime_picker.dart';
-import 'package:meetup/views/widgets/create_event/event_image_selector.dart';
-import 'package:meetup/views/widgets/create_event/event_message_helper.dart';
+import 'package:meetup/widgets/create_event/event_category_dropdown.dart';
+import 'package:meetup/widgets/create_event/event_datetime_picker.dart';
+import 'package:meetup/widgets/create_event/event_image_selector.dart';
+import 'package:meetup/widgets/create_event/event_message_helper.dart';
 
 class EditEventView extends StatelessWidget {
   final String eventId;
