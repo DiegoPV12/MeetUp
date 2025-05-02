@@ -60,13 +60,13 @@ class _HomeViewState extends State<HomeView> {
             builder: (ctx) {
               return IconButton(
                 icon: const Icon(Icons.menu),
-                onPressed: () => Scaffold.of(ctx).openDrawer(),
+                onPressed: () => Scaffold.of(ctx).openEndDrawer(),
               );
             },
           ),
         ],
       ),
-      drawer: const AppDrawerWidget(),
+      endDrawer: const AppDrawerWidget(),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(

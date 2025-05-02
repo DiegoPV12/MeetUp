@@ -50,7 +50,7 @@ class NextEventCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.asset(
-                imagePath,
+                'assets/images/${event.imageUrl!}',
                 width: 80,
                 height: 80,
                 fit: BoxFit.cover,
