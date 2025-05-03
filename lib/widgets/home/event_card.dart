@@ -61,7 +61,7 @@ class EventCard extends StatelessWidget {
                     top: Radius.circular(12),
                   ),
                   child: Image.asset(
-                    imagePath,
+                    'assets/images/${event.imageUrl!}',
                     height: height ?? 160,
                     width: double.infinity,
                     fit: BoxFit.fitWidth,
