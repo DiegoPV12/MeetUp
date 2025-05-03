@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:meetup/views/widgets/dashed_border.dart';
-import 'package:meetup/views/widgets/home/event_card.dart';
+import 'package:meetup/widgets/shared/dashed_border.dart';
+import 'package:meetup/widgets/home/event_card.dart';
 import 'package:meetup/models/event_model.dart';
 import 'package:meetup/theme/theme.dart';
 

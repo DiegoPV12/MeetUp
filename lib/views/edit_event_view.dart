@@ -1,19 +1,22 @@
+// lib/views/edit_event_view.dart
 import 'package:flutter/material.dart';
+import 'package:meetup/widgets/edit_event/date_card.dart';
+import 'package:meetup/widgets/event_details/section_header.dart';
+import 'package:meetup/widgets/home/section_title.dart';
 import 'package:provider/provider.dart';
 import 'package:meetup/viewmodels/edit_event_viewmodel.dart';
-import 'package:meetup/views/widgets/create_event/event_category_dropdown.dart';
-import 'package:meetup/views/widgets/create_event/event_datetime_picker.dart';
-import 'package:meetup/views/widgets/create_event/event_image_selector.dart';
-import 'package:meetup/views/widgets/create_event/event_message_helper.dart';
+import 'package:meetup/widgets/create_event/event_category_dropdown.dart';
+import 'package:meetup/widgets/create_event/event_image_selector.dart';
+import 'package:meetup/widgets/create_event/event_message_helper.dart';
+import 'package:meetup/theme/theme.dart';
 
 class EditEventView extends StatelessWidget {
   final String eventId;
-
   const EditEventView({super.key, required this.eventId});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return ChangeNotifierProvider<EditEventViewModel>(
       create: (_) => EditEventViewModel()..loadEvent(eventId),
       child: const _EditEventScreen(),
     );
@@ -22,134 +25,194 @@ class EditEventView extends StatelessWidget {
 
 class _EditEventScreen extends StatefulWidget {
   const _EditEventScreen();
-
   @override
   State<_EditEventScreen> createState() => _EditEventScreenState();
 }
 
 class _EditEventScreenState extends State<_EditEventScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _nameController;
-  late TextEditingController _descriptionController;
-  late TextEditingController _locationController;
-
-  String? _selectedCategory;
-  String? _selectedImage;
-  DateTime? _selectedDate;
-  TimeOfDay? _startTime;
-  TimeOfDay? _endTime;
-
-  bool _initialized = false;
+  late TextEditingController _nameCtrl, _descCtrl, _locCtrl;
+  String? _category, _image;
+  DateTime? _date;
+  TimeOfDay? _start, _end;
+  bool _init = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final viewModel = Provider.of<EditEventViewModel>(context);
-    final event = viewModel.event;
-
-    if (!_initialized && event != null) {
-      _nameController = TextEditingController(text: event.name);
-      _descriptionController = TextEditingController(text: event.description);
-      _locationController = TextEditingController(text: event.location);
-      _selectedCategory = event.category;
-      _selectedImage = event.imageUrl;
-      _selectedDate = event.startTime;
-      _startTime = TimeOfDay.fromDateTime(event.startTime);
-      _endTime =
-          event.endTime != null ? TimeOfDay.fromDateTime(event.endTime!) : null;
-      _initialized = true;
+    final vm = Provider.of<EditEventViewModel>(context);
+    final e = vm.event;
+    if (!_init && e != null) {
+      _nameCtrl = TextEditingController(text: e.name);
+      _descCtrl = TextEditingController(text: e.description);
+      _locCtrl = TextEditingController(text: e.location);
+      _category = e.category;
+      _image = e.imageUrl;
+      _date = e.startTime;
+      _start = TimeOfDay.fromDateTime(e.startTime);
+      _end = e.endTime != null ? TimeOfDay.fromDateTime(e.endTime!) : null;
+      _init = true;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = Provider.of<EditEventViewModel>(context);
+    final vm = Provider.of<EditEventViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Editar Evento'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+        title: const SectionTitle('Editar Evento'),
+        leading: BackButton(color: Theme.of(context).colorScheme.onBackground),
       ),
       body:
-          viewModel.isLoading || !_initialized
+          vm.isLoading || !_init
               ? const Center(child: CircularProgressIndicator())
               : SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Spacing.horizontalMargin,
+                  vertical: Spacing.verticalMargin,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTextField(
-                        _nameController,
-                        'Nombre del Evento',
-                        'Ej: Fiesta de Bienvenida',
+                      // Nombre
+                      TextFormField(
+                        controller: _nameCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Nombre del evento',
+                          hintText: 'Ej: Fiesta de Bienvenida',
+                        ),
+                        validator:
+                            (v) => v!.trim().isEmpty ? 'Requerido' : null,
                       ),
-                      const SizedBox(height: 16),
-                      _buildTextField(
-                        _descriptionController,
-                        'Descripción',
-                        'Describe brevemente el evento',
+
+                      const SizedBox(height: Spacing.spacingLarge),
+
+                      // Descripción
+                      TextFormField(
+                        controller: _descCtrl,
                         maxLines: 3,
+                        decoration: const InputDecoration(
+                          labelText: 'Descripción',
+                          hintText: 'Describe tu evento brevemente',
+                        ),
+                        validator:
+                            (v) => v!.trim().isEmpty ? 'Requerido' : null,
                       ),
-                      const SizedBox(height: 16),
-                      _buildTextField(
-                        _locationController,
-                        'Ubicación',
-                        'Ej: Av. Principal #123',
+
+                      const SizedBox(height: Spacing.spacingLarge),
+
+                      // Ubicación y Categoría en la misma fila
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: TextFormField(
+                              controller: _locCtrl,
+                              decoration: const InputDecoration(
+                                labelText: 'Ubicación',
+                                hintText: 'Ej: Av. Principal #123',
+                              ),
+                              validator:
+                                  (v) => v!.trim().isEmpty ? 'Requerido' : null,
+                            ),
+                          ),
+                          const SizedBox(width: Spacing.spacingMedium),
+                          Expanded(
+                            flex: 3,
+                            child: EventCategoryDropdown(
+                              selectedCategory: _category,
+                              onChanged: (v) => setState(() => _category = v),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      EventCategoryDropdown(
-                        selectedCategory: _selectedCategory,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedCategory = value;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 24),
-                      EventDateTimePicker(
-                        selectedDate: _selectedDate,
-                        startTime: _startTime,
-                        endTime: _endTime,
-                        onDatePicked: (date) {
-                          setState(() {
-                            _selectedDate = date;
-                          });
-                        },
-                        onStartTimePicked: (time) {
-                          setState(() {
-                            _startTime = time;
-                          });
-                        },
-                        onEndTimePicked: (time) {
-                          setState(() {
-                            _endTime = time;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 24),
+
+                      const SizedBox(height: Spacing.spacingXLarge),
+                      // Imagen
+                      const SectionHeader('Imagen'),
+
                       EventImageSelector(
-                        selectedImage: _selectedImage,
-                        onImageSelected: (value) {
-                          setState(() {
-                            _selectedImage = value;
-                          });
+                        selectedImage: _image,
+                        onImageSelected: (v) => setState(() => _image = v),
+                      ),
+
+                      const SizedBox(height: Spacing.spacingXXLarge),
+
+                      // Fecha y Hora
+                      DateTimeCard(
+                        label: 'Fecha',
+                        value:
+                            _date != null
+                                ? '${_date!.day}/${_date!.month}/${_date!.year}'
+                                : 'Selecciona fecha',
+                        icon: Icons.calendar_today,
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: _date ?? DateTime.now(),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(2100),
+                          );
+                          if (picked != null) setState(() => _date = picked);
                         },
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: Spacing.spacingMedium),
+                      DateTimeCard(
+                        label: 'Hora de Inicio',
+                        value: _start?.format(context) ?? 'Selecciona hora',
+                        icon: Icons.access_time,
+                        onTap: () async {
+                          final picked = await showTimePicker(
+                            context: context,
+                            initialTime: _start ?? TimeOfDay.now(),
+                          );
+                          if (picked != null) setState(() => _start = picked);
+                        },
+                      ),
+                      const SizedBox(height: Spacing.spacingMedium),
+                      DateTimeCard(
+                        label: 'Hora de Finalización',
+                        value: _end?.format(context) ?? 'Selecciona hora',
+                        icon: Icons.access_time,
+                        onTap: () async {
+                          final picked = await showTimePicker(
+                            context: context,
+                            initialTime: _end ?? TimeOfDay.now(),
+                          );
+                          if (picked != null) setState(() => _end = picked);
+                        },
+                      ),
+
+                      const SizedBox(height: Spacing.spacingXLarge),
+
+                      // Botones
                       SizedBox(
                         width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () => _onUpdatePressed(context),
+                        child: FilledButton.icon(
+                          onPressed: () => _onSave(context),
                           icon: const Icon(Icons.save),
                           label: const Text('Actualizar Evento'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            textStyle: const TextStyle(fontSize: 18),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: Spacing.spacingMedium,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: Spacing.spacingMedium),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.cancel_outlined),
+                          label: const Text('Cancelar'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: Spacing.spacingMedium,
+                            ),
                           ),
                         ),
                       ),
@@ -160,90 +223,54 @@ class _EditEventScreenState extends State<_EditEventScreen> {
     );
   }
 
-  Widget _buildTextField(
-    TextEditingController controller,
-    String label,
-    String hint, {
-    int maxLines = 1,
-  }) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        border: const OutlineInputBorder(),
-      ),
-      validator:
-          (value) =>
-              value == null || value.isEmpty
-                  ? 'Este campo es obligatorio'
-                  : null,
+  Future<void> _onSave(BuildContext ctx) async {
+    if (!_formKey.currentState!.validate() ||
+        _date == null ||
+        _start == null ||
+        _category == null ||
+        _image == null) {
+      showMessage(ctx, 'Completa todos los campos', isError: true);
+      return;
+    }
+
+    final startDt = DateTime(
+      _date!.year,
+      _date!.month,
+      _date!.day,
+      _start!.hour,
+      _start!.minute,
     );
-  }
-
-  Future<void> _onUpdatePressed(BuildContext context) async {
-    if (_formKey.currentState!.validate() &&
-        _selectedDate != null &&
-        _startTime != null &&
-        _selectedCategory != null &&
-        _selectedImage != null) {
-      final startDateTime = DateTime(
-        _selectedDate!.year,
-        _selectedDate!.month,
-        _selectedDate!.day,
-        _startTime!.hour,
-        _startTime!.minute,
+    DateTime? endDt;
+    if (_end != null) {
+      endDt = DateTime(
+        _date!.year,
+        _date!.month,
+        _date!.day,
+        _end!.hour,
+        _end!.minute,
       );
-
-      DateTime? endDateTime;
-      if (_endTime != null) {
-        endDateTime = DateTime(
-          _selectedDate!.year,
-          _selectedDate!.month,
-          _selectedDate!.day,
-          _endTime!.hour,
-          _endTime!.minute,
-        );
-        if (endDateTime.isBefore(startDateTime)) {
-          showMessage(
-            context,
-            'La hora de fin debe ser después de la hora de inicio',
-            isError: true,
-          );
-          return;
-        }
+      if (endDt.isBefore(startDt)) {
+        showMessage(ctx, 'La hora de fin debe ser después', isError: true);
+        return;
       }
+    }
 
-      try {
-        final eventId =
-            Provider.of<EditEventViewModel>(context, listen: false).event!.id;
-
-        await Provider.of<EditEventViewModel>(
-          context,
-          listen: false,
-        ).updateEvent(eventId, {
-          'name': _nameController.text.trim(),
-          'description': _descriptionController.text.trim(),
-          'location': _locationController.text.trim(),
-          'category': _selectedCategory!,
-          'startTime': startDateTime.toIso8601String(),
-          'endTime': endDateTime?.toIso8601String(),
-          'imageUrl': _selectedImage!,
-        });
-
-        if (!context.mounted) return;
-        showMessage(context, 'Evento actualizado exitosamente');
-        Navigator.pop(context, true); // <- retorna true al detalle
-      } catch (e) {
-        showMessage(context, 'Error al actualizar evento', isError: true);
-      }
-    } else {
-      showMessage(
-        context,
-        'Completa todos los campos requeridos',
-        isError: true,
-      );
+    try {
+      final vm = Provider.of<EditEventViewModel>(ctx, listen: false);
+      final id = vm.event!.id;
+      await vm.updateEvent(id, {
+        'name': _nameCtrl.text.trim(),
+        'description': _descCtrl.text.trim(),
+        'location': _locCtrl.text.trim(),
+        'category': _category!,
+        'startTime': startDt.toIso8601String(),
+        'endTime': endDt?.toIso8601String(),
+        'imageUrl': _image!,
+      });
+      showMessage(ctx, 'Evento actualizado');
+      Navigator.pop(ctx, true);
+    } catch (e) {
+      showMessage(ctx, 'Error al actualizar', isError: true);
     }
   }
 }

@@ -1,9 +1,9 @@
 // lib/views/list_events_view.dart
 import 'package:flutter/material.dart';
-import 'package:meetup/views/widgets/dashed_border.dart';
+import 'package:meetup/widgets/shared/dashed_border.dart';
 import 'package:provider/provider.dart';
-import 'package:meetup/views/widgets/home/section_title.dart';
-import 'package:meetup/views/widgets/home/next_event_card.dart';
+import 'package:meetup/widgets/home/section_title.dart';
+import 'package:meetup/widgets/home/next_event_card.dart';
 import 'package:meetup/theme/theme.dart';
 import '../viewmodels/event_viewmodel.dart';
 
