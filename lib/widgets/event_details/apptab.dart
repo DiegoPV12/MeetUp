@@ -21,7 +21,7 @@ class AppTabBar extends StatelessWidget implements PreferredSizeWidget {
       unselectedLabelStyle: TextStyle(color: cs.onSurfaceVariant),
 
       contentPadding: const EdgeInsets.symmetric(
-        horizontal: Spacing.spacingLarge,
+        horizontal: Spacing.spacingMedium,
       ),
 
       radius: 8,

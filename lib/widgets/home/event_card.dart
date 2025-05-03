@@ -76,7 +76,7 @@ class EventCard extends StatelessWidget {
                       horizontal: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: cs.secondaryContainer,
                       borderRadius: BorderRadius.circular(6),
                       boxShadow: const [
                         BoxShadow(

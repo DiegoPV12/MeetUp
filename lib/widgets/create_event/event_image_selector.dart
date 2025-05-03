@@ -21,6 +21,8 @@ class EventImageSelector extends StatelessWidget {
       '6.png',
     ];
 
+    final cs = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -40,13 +42,13 @@ class EventImageSelector extends StatelessWidget {
               return GestureDetector(
                 onTap: () => onImageSelected(imageName),
                 child: Container(
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     border: Border.all(
                       color:
                           selectedImage == imageName
                               ? Colors.blue
-                              : Colors.grey,
+                              : cs.secondary,
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(8),

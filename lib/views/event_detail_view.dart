@@ -51,25 +51,29 @@ class EventDetailView extends StatelessWidget {
             if (vm.isLoading) {
               return const Center(child: CircularProgressIndicator());
             }
+            if (vm.event == null) {
+              return Center(
+                child: Text(
+                  'Error al cargar el evento',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              );
+            }
+
             final e = vm.event!;
             final cancelled = e.isCancelled ?? false;
             final imagePath =
                 (e.imageUrl?.isNotEmpty ?? false)
                     ? 'assets/images/${e.imageUrl}'
-                    : 'assets/images/event_placeholder.png';
+                    : 'assets/images/4.png';
 
             return DefaultTabController(
               length: 3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Imagen + back button
                   EventHeader(imagePath: imagePath),
-
-                  // Espacio
                   const SizedBox(height: Spacing.spacingMedium),
-
-                  // Título + badge
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: Spacing.horizontalMargin,
@@ -86,13 +90,11 @@ class EventDetailView extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  // Categoría
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
-                      Spacing.spacingLarge,
+                      Spacing.horizontalMargin,
                       Spacing.spacingSmall,
-                      0,
+                      Spacing.horizontalMargin,
                       0,
                     ),
                     child: Text(
@@ -102,13 +104,11 @@ class EventDetailView extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  // TabBar con AppTabBar
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
+                      Spacing.horizontalMargin,
                       Spacing.spacingLarge,
-                      Spacing.spacingLarge,
-                      0,
+                      Spacing.horizontalMargin,
                       0,
                     ),
                     child: AppTabBar(
@@ -122,8 +122,6 @@ class EventDetailView extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  // Contenido de pestañas
                   Expanded(
                     child: DetailTabSection(
                       views: [
@@ -143,10 +141,9 @@ class EventDetailView extends StatelessWidget {
             );
           },
         ),
-
-        // Speed Dial
         floatingActionButton: Consumer<EventDetailViewModel>(
           builder: (ctx, vm, _) {
+            if (vm.event == null) return const SizedBox.shrink();
             final e = vm.event!;
             final cancelled = e.isCancelled ?? false;
             return SpeedDial(
@@ -164,9 +161,7 @@ class EventDetailView extends StatelessWidget {
                       '/edit-event',
                       arguments: e.id,
                     );
-                    if (updated == true) {
-                      vm.fetchEventDetail(e.id);
-                    }
+                    if (updated == true) vm.fetchEventDetail(e.id);
                   },
                 ),
                 SpeedDialChild(
