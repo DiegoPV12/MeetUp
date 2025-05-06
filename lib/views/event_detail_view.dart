@@ -1,6 +1,7 @@
 // lib/views/event_detail_view.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:meetup/widgets/event_details/task_tab.dart';
 import 'package:provider/provider.dart';
 import 'package:meetup/theme/theme.dart';
 import 'package:meetup/widgets/event_details/event_header.dart';
@@ -132,6 +133,7 @@ class EventDetailView extends StatelessWidget {
                           location: e.location,
                         ),
                         RsvpTab(confirmed: 12, total: 20),
+                        TaskTab(eventId),
                         BudgetTab(spent: 3000, budget: 5000),
                       ],
                     ),
