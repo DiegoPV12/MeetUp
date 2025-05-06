@@ -1,12 +1,15 @@
+// lib/widgets/create_event/event_datetime_picker.dart
 import 'package:flutter/material.dart';
+import 'package:meetup/theme/theme.dart';
 
 class EventDateTimePicker extends StatelessWidget {
   final DateTime? selectedDate;
   final TimeOfDay? startTime;
   final TimeOfDay? endTime;
-  final Function(DateTime) onDatePicked;
-  final Function(TimeOfDay) onStartTimePicked;
-  final Function(TimeOfDay) onEndTimePicked;
+
+  final ValueChanged<DateTime> onDatePicked;
+  final ValueChanged<TimeOfDay> onStartTimePicked;
+  final ValueChanged<TimeOfDay> onEndTimePicked;
 
   const EventDateTimePicker({
     super.key,
@@ -20,77 +23,111 @@ class EventDateTimePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    /* --- utilidades --- */
+    String dateLabel() {
+      if (selectedDate == null) return 'Selecciona una fecha';
+      final d = selectedDate!;
+      return '${d.day}/${d.month}/${d.year}';
+    }
+
+    String timeLabel(TimeOfDay? t) => t?.format(context) ?? '--:--';
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildRow(
-          label:
-              selectedDate == null
-                  ? 'No has seleccionado fecha'
-                  : 'Fecha: ${selectedDate!.toLocal().toString().split(' ')[0]}',
-          onPressed: () async {
+        _DateTimeField(
+          label: 'Fecha',
+          valueText: dateLabel(),
+          icon: Icons.calendar_today,
+          onTap: () async {
             final now = DateTime.now();
-            final pickedDate = await showDatePicker(
+            final picked = await showDatePicker(
               context: context,
-              initialDate: now,
+              initialDate: selectedDate ?? now,
               firstDate: now,
               lastDate: DateTime(now.year + 5),
             );
-            if (pickedDate != null) onDatePicked(pickedDate);
+            if (picked != null) onDatePicked(picked);
           },
-          icon: Icons.calendar_today,
-          buttonLabel: 'Seleccionar fecha',
         ),
-        const SizedBox(height: 16),
-        _buildRow(
-          label:
-              startTime == null
-                  ? 'No has seleccionado hora de inicio'
-                  : 'Inicio: ${startTime!.format(context)}',
-          onPressed: () async {
-            final picked = await showTimePicker(
-              context: context,
-              initialTime: TimeOfDay.now(),
-            );
-            if (picked != null) onStartTimePicked(picked);
-          },
-          icon: Icons.access_time,
-          buttonLabel: 'Hora inicio',
-        ),
-        const SizedBox(height: 16),
-        _buildRow(
-          label:
-              endTime == null
-                  ? 'No has seleccionado hora de fin'
-                  : 'Fin: ${endTime!.format(context)}',
-          onPressed: () async {
-            final picked = await showTimePicker(
-              context: context,
-              initialTime: TimeOfDay.now(),
-            );
-            if (picked != null) onEndTimePicked(picked);
-          },
-          icon: Icons.access_time,
-          buttonLabel: 'Hora fin',
+        const SizedBox(height: Spacing.spacingMedium),
+        Row(
+          children: [
+            Expanded(
+              child: _DateTimeField(
+                label: 'Hora inicio',
+                valueText: timeLabel(startTime),
+                icon: Icons.access_time,
+                onTap: () async {
+                  final picked = await showTimePicker(
+                    context: context,
+                    initialTime: startTime ?? TimeOfDay.now(),
+                  );
+                  if (picked != null) onStartTimePicked(picked);
+                },
+              ),
+            ),
+            const SizedBox(width: Spacing.spacingMedium),
+            Expanded(
+              child: _DateTimeField(
+                label: 'Hora fin',
+                valueText: timeLabel(endTime),
+                icon: Icons.access_time,
+                onTap: () async {
+                  final picked = await showTimePicker(
+                    context: context,
+                    initialTime: endTime ?? TimeOfDay.now(),
+                  );
+                  if (picked != null) onEndTimePicked(picked);
+                },
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
+}
 
-  Widget _buildRow({
-    required String label,
-    required VoidCallback onPressed,
-    required IconData icon,
-    required String buttonLabel,
-  }) {
-    return Row(
-      children: [
-        Expanded(child: Text(label, style: const TextStyle(fontSize: 16))),
-        ElevatedButton.icon(
-          onPressed: onPressed,
-          icon: Icon(icon),
-          label: Text(buttonLabel),
+/*------------------------------
+| Widget auxiliar                                    
+---------------------------*/
+class _DateTimeField extends StatelessWidget {
+  final String label;
+  final String valueText;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _DateTimeField({
+    required this.label,
+    required this.valueText,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon),
+          border: const OutlineInputBorder(),
         ),
-      ],
+        child: Text(
+          valueText,
+          style: tt.bodyLarge!.copyWith(
+            color:
+                (valueText.startsWith('Selecciona'))
+                    ? cs.onSurfaceVariant
+                    : cs.onSurface,
+          ),
+        ),
+      ),
     );
   }
 }

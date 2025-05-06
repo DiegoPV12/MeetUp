@@ -93,7 +93,7 @@ class _HomeViewState extends State<HomeView> {
                         Navigator.pushNamed(context, '/choose-event-creation'),
                 backgroundColor:
                     Theme.of(context).colorScheme.secondaryContainer,
-                imagePath: 'assets/images/create_event.png',
+                imagePath: 'assets/images/scratch.png',
               ),
             ],
           ),

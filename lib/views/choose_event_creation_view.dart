@@ -1,47 +1,66 @@
+// lib/views/choose_event_creation_view.dart
 import 'package:flutter/material.dart';
+import 'package:meetup/theme/theme.dart';
+import 'package:meetup/widgets/home/action_card.dart';
+import 'package:meetup/widgets/shared/back_button_styled.dart';
 
 class ChooseEventCreationView extends StatelessWidget {
   const ChooseEventCreationView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Crear Evento')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              '¿Cómo deseas crear tu evento?',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.pushNamed(context, '/create-event');
-              },
-              icon: const Icon(Icons.create),
-              label: const Text('Desde cero'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 60),
-                textStyle: const TextStyle(fontSize: 18),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.horizontalMargin,
+            vertical: Spacing.verticalMargin,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Back button con sombra
+              const BackButtonStyled(),
+              const SizedBox(height: Spacing.spacingXXLarge),
+
+              // Título
+              Text(
+                '¿Cómo deseas crear tu evento?',
+                style: tt.headlineLarge,
+                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.pushNamed(context, '/create-from-template');
-              },
-              icon: const Icon(Icons.format_shapes),
-              label: const Text('Usar plantilla'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 60),
-                textStyle: const TextStyle(fontSize: 18),
+
+              const SizedBox(height: Spacing.spacingXXLarge),
+
+              // Acción: Desde cero
+              ActionCard(
+                title: 'Crear desde cero',
+                subtitle: 'Comienza con un lienzo\nen blanco',
+                buttonLabel: 'CREAR',
+                onPressed: () => Navigator.pushNamed(context, '/create-event'),
+                backgroundColor: cs.primaryContainer,
+                imagePath: 'assets/images/scratch.png',
               ),
-            ),
-          ],
+
+              const SizedBox(height: Spacing.spacingLarge),
+
+              // Acción: Usar plantilla
+              ActionCard(
+                title: 'Usar plantilla',
+                subtitle: 'Elige entre opciones\nprediseñadas',
+                buttonLabel: 'PLANTILLA',
+                onPressed:
+                    () => Navigator.pushNamed(context, '/create-from-template'),
+                backgroundColor: cs.tertiaryContainer,
+                buttonColor: cs.onTertiaryFixed, // color de fondo del botón
+                buttonTextColor: cs.onPrimary, // color del texto del botón
+                imagePath: 'assets/images/template.png',
+              ),
+            ],
+          ),
         ),
       ),
     );

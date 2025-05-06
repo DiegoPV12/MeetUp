@@ -1,194 +1,225 @@
+// lib/views/create_event/create_event_form_wizard.dart
 import 'package:flutter/material.dart';
-import 'package:meetup/widgets/create_event/event_image_selector.dart';
-import '../../viewmodels/event_viewmodel.dart';
-import 'event_category_dropdown.dart';
-import 'event_datetime_picker.dart';
-import 'event_message_helper.dart';
+import 'package:meetup/theme/theme.dart';
+import 'package:meetup/viewmodels/event_viewmodel.dart';
+import 'package:meetup/views/create_event_date_section.dart';
+import 'package:meetup/views/create_event_details_section.dart';
+import 'package:meetup/views/create_event_image_section.dart';
+import 'package:meetup/views/create_event_location_section.dart';
+import 'package:meetup/widgets/home/section_title.dart';
 
-class CreateEventForm extends StatefulWidget {
+class CreateEventFormWizard extends StatefulWidget {
   final EventViewModel eventViewModel;
-
-  const CreateEventForm({super.key, required this.eventViewModel});
+  const CreateEventFormWizard({super.key, required this.eventViewModel});
 
   @override
-  State<CreateEventForm> createState() => _CreateEventFormState();
+  State<CreateEventFormWizard> createState() => _CreateEventFormWizardState();
 }
 
-class _CreateEventFormState extends State<CreateEventForm> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _locationController = TextEditingController();
+class _CreateEventFormWizardState extends State<CreateEventFormWizard> {
+  // Paso actual
+  int _step = 0;
 
-  String? _selectedCategory;
-  String? _selectedImage;
-  DateTime? _selectedDate;
+  // FormKeys de secciones con TextFormFields
+  final _formKeys = List<GlobalKey<FormState>>.generate(
+    2,
+    (_) => GlobalKey<FormState>(),
+  );
+
+  // Controladores / datos
+  final _nameCtrl = TextEditingController();
+  final _descCtrl = TextEditingController();
+  final _locCtrl = TextEditingController();
+  String? _category;
+  DateTime? _date;
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
+  String? _image;
 
+  final _stepLabels = const ['Detalles', 'Ubicación', 'Fecha y hora', 'Imagen'];
+
+  // ---------- Navegación ----------
+  void _next() {
+    if (_step < 2 && !_formKeys[_step].currentState!.validate()) return;
+
+    if (_step == 2 && (_date == null || _startTime == null)) {
+      _showMsg('Selecciona fecha y hora de inicio');
+      return;
+    }
+
+    if (_step == 3) {
+      _submit();
+      return;
+    }
+    setState(() => _step++);
+  }
+
+  void _back() {
+    if (_step > 0) setState(() => _step--);
+  }
+
+  // ---------- Utilidades ----------
+  void _showMsg(String m) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
+
+  Future<void> _submit() async {
+    if (_image == null) {
+      _showMsg('Selecciona una imagen');
+      return;
+    }
+
+    final start = DateTime(
+      _date!.year,
+      _date!.month,
+      _date!.day,
+      _startTime!.hour,
+      _startTime!.minute,
+    );
+    final end =
+        _endTime != null
+            ? DateTime(
+              _date!.year,
+              _date!.month,
+              _date!.day,
+              _endTime!.hour,
+              _endTime!.minute,
+            )
+            : null;
+
+    if (end != null && end.isBefore(start)) {
+      _showMsg('La hora de fin debe ser después de la de inicio');
+      return;
+    }
+
+    try {
+      await widget.eventViewModel.createEvent(
+        name: _nameCtrl.text.trim(),
+        description: _descCtrl.text.trim(),
+        location: _locCtrl.text.trim(),
+        category: _category!,
+        startTime: start,
+        endTime: end,
+        imageUrl: _image!,
+      );
+      _showMsg('Evento creado exitosamente');
+      if (context.mounted) Navigator.pop(context, true);
+    } catch (_) {
+      _showMsg('Error al crear evento');
+    }
+  }
+
+  // ---------- Build ----------
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildTextField(
-            controller: _nameController,
-            label: 'Nombre del Evento',
-            hint: 'Ej: Fiesta de Bienvenida',
-          ),
-          const SizedBox(height: 16),
-          _buildTextField(
-            controller: _descriptionController,
-            label: 'Descripción',
-            hint: 'Describe brevemente el evento',
-            maxLines: 3,
-          ),
-          const SizedBox(height: 16),
-          _buildTextField(
-            controller: _locationController,
-            label: 'Ubicación',
-            hint: 'Ej: Av. Principal #123',
-          ),
-          const SizedBox(height: 16),
-          EventCategoryDropdown(
-            selectedCategory: _selectedCategory,
-            onChanged: (value) {
-              setState(() {
-                _selectedCategory = value;
-              });
-            },
-          ),
-          const SizedBox(height: 24),
-          EventDateTimePicker(
-            selectedDate: _selectedDate,
-            startTime: _startTime,
-            endTime: _endTime,
-            onDatePicked: (date) {
-              setState(() {
-                _selectedDate = date;
-                _startTime = null;
-                _endTime = null;
-              });
-            },
-            onStartTimePicked: (time) {
-              setState(() {
-                _startTime = time;
-              });
-            },
-            onEndTimePicked: (time) {
-              setState(() {
-                _endTime = time;
-              });
-            },
-          ),
-          const SizedBox(height: 24),
-          EventImageSelector(
-            selectedImage: _selectedImage,
-            onImageSelected: (imageName) {
-              setState(() {
-                _selectedImage = imageName;
-              });
-            },
-          ),
-          const SizedBox(height: 32),
-          widget.eventViewModel.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _onCreateEventPressed,
-                  icon: const Icon(Icons.check),
-                  label: const Text('Crear Evento'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    textStyle: const TextStyle(fontSize: 18),
-                  ),
-                ),
+    final pages = [
+      DetailsSection(
+        formKey: _formKeys[0],
+        nameController: _nameCtrl,
+        descriptionController: _descCtrl,
+      ),
+      LocationSection(
+        formKey: _formKeys[1],
+        locationController: _locCtrl,
+        selectedCategory: _category,
+        onCategoryChanged: (v) => setState(() => _category = v),
+      ),
+      DateTimeSection(
+        selectedDate: _date,
+        startTime: _startTime,
+        endTime: _endTime,
+        onDatePicked: (d) => setState(() => _date = d),
+        onStartPicked: (t) => setState(() => _startTime = t),
+        onEndPicked: (t) => setState(() => _endTime = t),
+      ),
+      ImageSection(
+        selectedImage: _image,
+        onImageSelected: (img) => setState(() => _image = img),
+      ),
+    ];
+
+    final cs = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      appBar: AppBar(title: const SectionTitle('Crear Evento')),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Indicador con texto
+            Padding(
+              padding: const EdgeInsets.all(Spacing.spacingMedium),
+              child: Row(
+                children: List.generate(_stepLabels.length, (i) {
+                  final selected = i == _step;
+                  return Expanded(
+                    child: Column(
+                      children: [
+                        Container(
+                          height: 4,
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: Spacing.spacingXSmall,
+                          ),
+                          color:
+                              i <= _step
+                                  ? cs.primary
+                                  : cs.surfaceContainerHighest,
+                        ),
+                        const SizedBox(height: Spacing.spacingXSmall),
+                        Text(
+                          _stepLabels[i],
+                          textAlign: TextAlign.center,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.labelLarge!.copyWith(
+                            color: selected ? cs.primary : cs.onSurfaceVariant,
+                            fontWeight:
+                                selected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
               ),
-        ],
+            ),
+
+            // Contenido de la sección actual
+            Expanded(child: pages[_step]),
+
+            // Botones navegación
+            Padding(
+              padding: const EdgeInsets.all(Spacing.spacingMedium),
+              child: Row(
+                children: [
+                  if (_step > 0)
+                    FilledButton.tonalIcon(
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(120, 48),
+                      ),
+                      onPressed: _back,
+                      icon: const Icon(Icons.arrow_back),
+                      label: const Text('Atrás'),
+                    ),
+                  const Spacer(),
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(140, 48),
+                    ),
+                    onPressed: _next,
+                    icon: Icon(
+                      _step == pages.length - 1
+                          ? Icons.check
+                          : Icons.arrow_forward,
+                    ),
+                    label: Text(
+                      _step == pages.length - 1 ? 'Crear' : 'Siguiente',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    int maxLines = 1,
-  }) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        border: const OutlineInputBorder(),
-      ),
-      validator:
-          (value) =>
-              value == null || value.isEmpty
-                  ? 'Este campo es obligatorio'
-                  : null,
-    );
-  }
-
-  Future<void> _onCreateEventPressed() async {
-    if (_formKey.currentState!.validate() &&
-        _selectedDate != null &&
-        _startTime != null &&
-        _selectedCategory != null &&
-        _selectedImage != null) {
-      final startDateTime = DateTime(
-        _selectedDate!.year,
-        _selectedDate!.month,
-        _selectedDate!.day,
-        _startTime!.hour,
-        _startTime!.minute,
-      );
-
-      DateTime? endDateTime;
-      if (_endTime != null) {
-        endDateTime = DateTime(
-          _selectedDate!.year,
-          _selectedDate!.month,
-          _selectedDate!.day,
-          _endTime!.hour,
-          _endTime!.minute,
-        );
-
-        if (endDateTime.isBefore(startDateTime)) {
-          showMessage(
-            context,
-            'La hora de fin debe ser después de la hora de inicio',
-            isError: true,
-          );
-          return;
-        }
-      }
-
-      try {
-        await widget.eventViewModel.createEvent(
-          name: _nameController.text.trim(),
-          description: _descriptionController.text.trim(),
-          location: _locationController.text.trim(),
-          category: _selectedCategory!,
-          startTime: startDateTime,
-          endTime: endDateTime, // <-- Puede ser null
-          imageUrl: _selectedImage!,
-        );
-        showMessage(context, 'Evento creado exitosamente');
-        Navigator.pop(context, true);
-      } catch (e) {
-        showMessage(context, 'Error al crear el evento', isError: true);
-      }
-    } else {
-      showMessage(
-        context,
-        'Completa todos los campos requeridos',
-        isError: true,
-      );
-    }
   }
 }

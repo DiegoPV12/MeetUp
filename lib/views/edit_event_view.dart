@@ -1,14 +1,15 @@
 // lib/views/edit_event_view.dart
 import 'package:flutter/material.dart';
-import 'package:meetup/widgets/edit_event/date_card.dart';
-import 'package:meetup/widgets/event_details/section_header.dart';
-import 'package:meetup/widgets/home/section_title.dart';
 import 'package:provider/provider.dart';
+import 'package:meetup/theme/theme.dart';
 import 'package:meetup/viewmodels/edit_event_viewmodel.dart';
+
 import 'package:meetup/widgets/create_event/event_category_dropdown.dart';
 import 'package:meetup/widgets/create_event/event_image_selector.dart';
+import 'package:meetup/widgets/create_event/event_datetime_picker.dart';
 import 'package:meetup/widgets/create_event/event_message_helper.dart';
-import 'package:meetup/theme/theme.dart';
+import 'package:meetup/widgets/event_details/section_header.dart';
+import 'package:meetup/widgets/home/section_title.dart';
 
 class EditEventView extends StatelessWidget {
   final String eventId;
@@ -23,15 +24,20 @@ class EditEventView extends StatelessWidget {
   }
 }
 
+/*───────────────────────────────────────────────────────────────────────────*/
+
 class _EditEventScreen extends StatefulWidget {
   const _EditEventScreen();
+
   @override
   State<_EditEventScreen> createState() => _EditEventScreenState();
 }
 
 class _EditEventScreenState extends State<_EditEventScreen> {
   final _formKey = GlobalKey<FormState>();
+
   late TextEditingController _nameCtrl, _descCtrl, _locCtrl;
+
   String? _category, _image;
   DateTime? _date;
   TimeOfDay? _start, _end;
@@ -40,8 +46,7 @@ class _EditEventScreenState extends State<_EditEventScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final vm = Provider.of<EditEventViewModel>(context);
-    final e = vm.event;
+    final e = context.read<EditEventViewModel>().event;
     if (!_init && e != null) {
       _nameCtrl = TextEditingController(text: e.name);
       _descCtrl = TextEditingController(text: e.description);
@@ -55,9 +60,11 @@ class _EditEventScreenState extends State<_EditEventScreen> {
     }
   }
 
+  /*──────────────────────────  UI  ──────────────────────────*/
+
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<EditEventViewModel>(context);
+    final vm = context.watch<EditEventViewModel>();
 
     return Scaffold(
       appBar: AppBar(
@@ -65,7 +72,7 @@ class _EditEventScreenState extends State<_EditEventScreen> {
         leading: BackButton(color: Theme.of(context).colorScheme.onBackground),
       ),
       body:
-          vm.isLoading || !_init
+          (vm.isLoading || !_init)
               ? const Center(child: CircularProgressIndicator())
               : SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
@@ -77,7 +84,7 @@ class _EditEventScreenState extends State<_EditEventScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Nombre
+                      /*── Detalles ──────────────────────────────*/
                       TextFormField(
                         controller: _nameCtrl,
                         decoration: const InputDecoration(
@@ -87,10 +94,7 @@ class _EditEventScreenState extends State<_EditEventScreen> {
                         validator:
                             (v) => v!.trim().isEmpty ? 'Requerido' : null,
                       ),
-
                       const SizedBox(height: Spacing.spacingLarge),
-
-                      // Descripción
                       TextFormField(
                         controller: _descCtrl,
                         maxLines: 3,
@@ -104,7 +108,7 @@ class _EditEventScreenState extends State<_EditEventScreen> {
 
                       const SizedBox(height: Spacing.spacingLarge),
 
-                      // Ubicación y Categoría en la misma fila
+                      /*── Ubicación + Categoría ─────────────────*/
                       Row(
                         children: [
                           Expanded(
@@ -131,9 +135,9 @@ class _EditEventScreenState extends State<_EditEventScreen> {
                       ),
 
                       const SizedBox(height: Spacing.spacingXLarge),
-                      // Imagen
-                      const SectionHeader('Imagen'),
 
+                      /*── Imagen ───────────────────────────────*/
+                      const SectionHeader('Imagen'),
                       EventImageSelector(
                         selectedImage: _image,
                         onImageSelected: (v) => setState(() => _image = v),
@@ -141,87 +145,64 @@ class _EditEventScreenState extends State<_EditEventScreen> {
 
                       const SizedBox(height: Spacing.spacingXXLarge),
 
-                      // Fecha y Hora
-                      DateTimeCard(
-                        label: 'Fecha',
-                        value:
-                            _date != null
-                                ? '${_date!.day}/${_date!.month}/${_date!.year}'
-                                : 'Selecciona fecha',
-                        icon: Icons.calendar_today,
-                        onTap: () async {
-                          final picked = await showDatePicker(
-                            context: context,
-                            initialDate: _date ?? DateTime.now(),
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime(2100),
-                          );
-                          if (picked != null) setState(() => _date = picked);
-                        },
-                      ),
+                      /*── Fecha y hora  (nuevo componente) ─────*/
+                      const SectionHeader('Fecha y hora'),
                       const SizedBox(height: Spacing.spacingMedium),
-                      DateTimeCard(
-                        label: 'Hora de Inicio',
-                        value: _start?.format(context) ?? 'Selecciona hora',
-                        icon: Icons.access_time,
-                        onTap: () async {
-                          final picked = await showTimePicker(
-                            context: context,
-                            initialTime: _start ?? TimeOfDay.now(),
-                          );
-                          if (picked != null) setState(() => _start = picked);
-                        },
-                      ),
-                      const SizedBox(height: Spacing.spacingMedium),
-                      DateTimeCard(
-                        label: 'Hora de Finalización',
-                        value: _end?.format(context) ?? 'Selecciona hora',
-                        icon: Icons.access_time,
-                        onTap: () async {
-                          final picked = await showTimePicker(
-                            context: context,
-                            initialTime: _end ?? TimeOfDay.now(),
-                          );
-                          if (picked != null) setState(() => _end = picked);
-                        },
+                      EventDateTimePicker(
+                        selectedDate: _date,
+                        startTime: _start,
+                        endTime: _end,
+                        onDatePicked: (d) => setState(() => _date = d),
+                        onStartTimePicked: (t) => setState(() => _start = t),
+                        onEndTimePicked: (t) => setState(() => _end = t),
                       ),
 
                       const SizedBox(height: Spacing.spacingXLarge),
 
-                      // Botones
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          onPressed: () => _onSave(context),
-                          icon: const Icon(Icons.save),
-                          label: const Text('Actualizar Evento'),
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: Spacing.spacingMedium,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: Spacing.spacingMedium),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.cancel_outlined),
-                          label: const Text('Cancelar'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: Spacing.spacingMedium,
-                            ),
-                          ),
-                        ),
-                      ),
+                      /*── Botones ──────────────────────────────*/
+                      _buildButtons(context),
                     ],
                   ),
                 ),
               ),
     );
   }
+
+  Widget _buildButtons(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: () => _onSave(context),
+            icon: const Icon(Icons.save),
+            label: const Text('Actualizar Evento'),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                vertical: Spacing.spacingMedium,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: Spacing.spacingMedium),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.cancel_outlined),
+            label: const Text('Cancelar'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                vertical: Spacing.spacingMedium,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /*────────────────────────  Guardar  ───────────────────────*/
 
   Future<void> _onSave(BuildContext ctx) async {
     if (!_formKey.currentState!.validate() ||
@@ -240,6 +221,7 @@ class _EditEventScreenState extends State<_EditEventScreen> {
       _start!.hour,
       _start!.minute,
     );
+
     DateTime? endDt;
     if (_end != null) {
       endDt = DateTime(
@@ -256,7 +238,7 @@ class _EditEventScreenState extends State<_EditEventScreen> {
     }
 
     try {
-      final vm = Provider.of<EditEventViewModel>(ctx, listen: false);
+      final vm = context.read<EditEventViewModel>();
       final id = vm.event!.id;
       await vm.updateEvent(id, {
         'name': _nameCtrl.text.trim(),
@@ -269,7 +251,7 @@ class _EditEventScreenState extends State<_EditEventScreen> {
       });
       showMessage(ctx, 'Evento actualizado');
       Navigator.pop(ctx, true);
-    } catch (e) {
+    } catch (_) {
       showMessage(ctx, 'Error al actualizar', isError: true);
     }
   }

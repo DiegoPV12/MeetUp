@@ -1,54 +1,129 @@
+// lib/views/create_from_template_view.dart
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:meetup/theme/theme.dart';
+import 'package:meetup/widgets/shared/back_button_styled.dart';
+import 'package:meetup/widgets/create_event/template_card.dart';
 
 class CreateFromTemplateView extends StatelessWidget {
-  const CreateFromTemplateView({Key? key}) : super(key: key);
+  const CreateFromTemplateView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final templates = [
+      {
+        'title': 'Cumpleaños',
+        'subtitle': '¡Celebración llena de confeti!',
+        'imagePath': 'assets/images/birthday.png',
+        'bgColor': cs.primaryContainer,
+        'arrowColor': cs.onPrimaryContainer,
+        'onTap': () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Plantilla Cumpleaños seleccionada')),
+          );
+        },
+      },
+      {
+        'title': 'Junte',
+        'subtitle': 'Encuentro con amigos',
+        'imagePath': 'assets/images/friends.png',
+        'bgColor': cs.secondaryContainer,
+        'arrowColor': cs.onSecondaryContainer,
+        'onTap': () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Plantilla Junte seleccionada')),
+          );
+        },
+      },
+      {
+        'title': 'Reunión Familiar',
+        'subtitle': 'Momentos en familia',
+        'imagePath': 'assets/images/family.png',
+        'bgColor': cs.tertiaryContainer,
+        'arrowColor': cs.onTertiaryContainer,
+        'onTap': () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Plantilla Reunión Familiar seleccionada'),
+            ),
+          );
+        },
+      },
+      {
+        'title': 'Cena',
+        'subtitle': 'Cena elegante',
+        'imagePath': 'assets/images/friends.png',
+        'bgColor': cs.errorContainer,
+        'arrowColor': cs.onErrorContainer,
+        'onTap': () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Plantilla Cena seleccionada')),
+          );
+        },
+      },
+    ];
+    double carouselHeight = 386.0;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Crear desde plantilla')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
+      body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Elige una plantilla',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: () {
-                // Aquí podrías navegar a la creación de evento precargado de Cumpleaños
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Plantilla Cumpleaños seleccionada'),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.cake),
-              label: const Text('Cumpleaños'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 60),
-                textStyle: const TextStyle(fontSize: 18),
+            const Padding(
+              padding: EdgeInsets.all(Spacing.spacingMedium),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: BackButtonStyled(),
               ),
             ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                // Aquí podrías navegar a la creación de evento precargado de Junte
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Plantilla Junte seleccionada')),
-                );
-              },
-              icon: const Icon(Icons.people),
-              label: const Text('Junte'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 60),
-                textStyle: const TextStyle(fontSize: 18),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.horizontalMargin,
+              ),
+              child: Text(
+                'Elige una plantilla',
+                style: Theme.of(context).textTheme.headlineLarge,
+                textAlign: TextAlign.center,
               ),
             ),
+
+            const SizedBox(height: Spacing.spacingXLarge),
+
+            SizedBox(
+              height: carouselHeight,
+              child: CarouselSlider.builder(
+                itemCount: templates.length,
+                options: CarouselOptions(
+                  height: carouselHeight,
+                  enlargeCenterPage: true,
+                  viewportFraction: 0.8, // <--- menos ancho ocupado
+                  enableInfiniteScroll: false,
+                  padEnds: true,
+                ),
+                itemBuilder: (ctx, index, realIdx) {
+                  final tpl = templates[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Spacing.spacingSmall,
+                    ),
+                    child: AspectRatio(
+                      aspectRatio: 4 / 4, // <--- forzamos proporción
+                      child: TemplateCard(
+                        title: tpl['title'] as String,
+                        subtitle: tpl['subtitle'] as String,
+                        imagePath: tpl['imagePath'] as String,
+                        backgroundColor: tpl['bgColor'] as Color,
+                        arrowColor: tpl['arrowColor'] as Color,
+                        onTap: tpl['onTap'] as VoidCallback,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: Spacing.spacingLarge),
           ],
         ),
       ),
