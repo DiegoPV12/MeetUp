@@ -72,7 +72,7 @@ class MeetUpApp extends StatelessWidget {
           '/event-tasks': (context) {
             final eventId =
                 ModalRoute.of(context)!.settings.arguments as String;
-            return TaskListView(eventId: eventId);
+            return TaskBoardView(eventId: eventId);
           },
         },
       ),

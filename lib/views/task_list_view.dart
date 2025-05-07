@@ -1,41 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:meetup/models/task_model.dart';
-import 'package:meetup/widgets/tasks/task_tile.dart';
+import 'package:meetup/widgets/tasks/task_columns.dart';
 import 'package:provider/provider.dart';
-import '../../../viewmodels/task_viewmodel.dart';
 
-class TaskListView extends StatefulWidget {
+import '../../models/task_model.dart';
+import '../../theme/theme.dart';
+import '../../viewmodels/task_viewmodel.dart';
+import '../../widgets/home/section_title.dart';
+
+/* colores pastel “semáforo” */
+const _yellowPastel = Color(0xFFFFF9C4); // PENDIENTE
+const _bluePastel = Color(0xFFBBDEFB); // EN PROGRESO
+const _greenPastel = Color(0xFFC8E6C9); // COMPLETADO
+
+class TaskBoardView extends StatefulWidget {
   final String eventId;
-
-  const TaskListView({super.key, required this.eventId});
+  const TaskBoardView({super.key, required this.eventId});
 
   @override
-  State<TaskListView> createState() => _TaskListViewState();
+  State<TaskBoardView> createState() => _TaskBoardViewState();
 }
 
-class _TaskListViewState extends State<TaskListView> {
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
-
-  void _showTaskFormSheet(
+class _TaskBoardViewState extends State<TaskBoardView> {
+  /* ─────────── hoja modal NUEVA / EDITAR ─────────── */
+  void _openTaskSheet(
     BuildContext context,
     TaskViewModel vm, {
-    TaskModel? existingTask,
+    TaskModel? task,
   }) {
-    final isEdit = existingTask != null;
-    final titleController = TextEditingController(
-      text: existingTask?.title ?? '',
-    );
-    final descriptionController = TextEditingController(
-      text: existingTask?.description ?? '',
-    );
+    final isEdit = task != null;
+    final tCtrl = TextEditingController(text: task?.title);
+    final dCtrl = TextEditingController(text: task?.description);
 
     showModalBottomSheet(
       context: context,
@@ -46,82 +40,62 @@ class _TaskListViewState extends State<TaskListView> {
       builder:
           (ctx) => Padding(
             padding: EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 24,
-              bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
+              left: Spacing.spacingLarge,
+              right: Spacing.spacingLarge,
+              top: Spacing.spacingLarge,
+              bottom:
+                  MediaQuery.of(ctx).viewInsets.bottom + Spacing.spacingLarge,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  isEdit ? 'Editar Tarea' : 'Nueva Tarea',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  isEdit ? 'Editar tarea' : 'Nueva tarea',
+                  style: Theme.of(ctx).textTheme.titleMedium,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: Spacing.spacingLarge),
                 TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Título',
-                    border: OutlineInputBorder(),
-                  ),
+                  controller: tCtrl,
+                  decoration: const InputDecoration(labelText: 'Título'),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: Spacing.spacingMedium),
                 TextField(
-                  controller: descriptionController,
+                  controller: dCtrl,
                   maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: 'Descripción',
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: const InputDecoration(labelText: 'Descripción'),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: Spacing.spacingLarge),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
                     icon: Icon(isEdit ? Icons.save : Icons.check),
-                    label: Text(isEdit ? 'Guardar Cambios' : 'Crear Tarea'),
+                    label: Text(isEdit ? 'Guardar' : 'Crear'),
                     onPressed: () async {
-                      final title = titleController.text.trim();
-                      final desc = descriptionController.text.trim();
-
+                      final title = tCtrl.text.trim();
+                      final desc = dCtrl.text.trim();
                       if (title.isEmpty || desc.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Completa ambos campos'),
-                          ),
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          const SnackBar(content: Text('Completa los campos')),
                         );
                         return;
                       }
-
                       try {
                         if (isEdit) {
                           await vm.editTask(
-                            existingTask!.id,
+                            task.id,
                             title,
                             desc,
                             widget.eventId,
                           );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Tarea actualizada')),
-                          );
                         } else {
                           await vm.addTask(widget.eventId, title, desc);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Tarea creada')),
-                          );
                         }
-                        if (context.mounted) Navigator.pop(ctx);
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        if (mounted) Navigator.pop(ctx);
+                      } catch (_) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(
                           SnackBar(
                             content: Text(
-                              isEdit
-                                  ? 'Error al actualizar tarea'
-                                  : 'Error al crear tarea',
+                              isEdit ? 'Error al actualizar' : 'Error al crear',
                             ),
                           ),
                         );
@@ -135,122 +109,137 @@ class _TaskListViewState extends State<TaskListView> {
     );
   }
 
+  /* ───────── diálogo de confirmación para papelera ───────── */
+  Future<bool> _confirmDelete(BuildContext ctx) async {
+    return await showDialog<bool>(
+          context: ctx,
+          builder:
+              (_) => AlertDialog(
+                title: const Text('Eliminar tarea'),
+                content: const Text(
+                  '¿Estás seguro de que deseas eliminar la tarea?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('Cancelar'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text('Eliminar'),
+                  ),
+                ],
+              ),
+        ) ??
+        false;
+  }
+
+  /* ────────────────────────── build ────────────────────────── */
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => TaskViewModel()..loadTasks(widget.eventId),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Checklist del Evento'),
-          actions: [
-            Consumer<TaskViewModel>(
+      child: Consumer<TaskViewModel>(
+        builder: (ctx, vm, _) {
+          /* separar por estado */
+          final pending = vm.tasks.where((t) => t.status == 'pending').toList();
+          final inProg =
+              vm.tasks.where((t) => t.status == 'in_progress').toList();
+          final done = vm.tasks.where((t) => t.status == 'completed').toList();
+
+          /* papelera */
+          Widget trash() {
+            final cs = Theme.of(ctx).colorScheme;
+            return DragTarget<TaskModel>(
+              onWillAcceptWithDetails: (_) => true,
+              onAcceptWithDetails: (details) async {
+                final task = details.data;
+                final original = task.status;
+                vm.moveTaskOptimistic(task, '__trash__');
+                final ok = await _confirmDelete(ctx);
+                if (ok) {
+                  await vm.deleteTask(task.id, widget.eventId);
+                } else {
+                  vm.revertTaskStatus(task, original);
+                }
+              },
               builder:
-                  (_, vm, __) => IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () => _showTaskFormSheet(context, vm),
+                  (_, __, ___) => Container(
+                    height: 60,
+                    margin: const EdgeInsets.only(top: Spacing.spacingMedium),
+                    decoration: BoxDecoration(
+                      color: cs.errorContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.delete,
+                      color: cs.onErrorContainer,
+                      size: 32,
+                    ),
                   ),
-            ),
-          ],
-        ),
-        body: Consumer<TaskViewModel>(
-          builder: (context, vm, _) {
-            return Column(
-              children: [
-                if (vm.isLoading) const LinearProgressIndicator(),
-                Expanded(
-                  child:
-                      vm.tasks.isEmpty
-                          ? const Center(child: Text('No hay tareas aún.'))
-                          : ListView.builder(
-                            itemCount: vm.tasks.length,
-                            itemBuilder: (context, index) {
-                              final task = vm.tasks[index];
-                              return TaskTile(
-                                task: task,
-                                onStatusChange: (newStatus) async {
-                                  await vm.setTaskStatus(task.id, newStatus);
-                                },
-                                onEdit:
-                                    () => _showTaskFormSheet(
-                                      context,
-                                      vm,
-                                      existingTask: task,
-                                    ),
-                                onDelete: () async {
-                                  final deletedTask = task;
-                                  final taskIndex = vm.tasks.indexOf(task);
+            );
+          }
 
-                                  try {
-                                    await vm.deleteTask(
-                                      task.id,
-                                      widget.eventId,
-                                    );
+          /* helper: crea una columna de tareas */
+          Widget buildColumn({
+            required String status,
+            required Color bg,
+            required List<TaskModel> tasks,
+          }) {
+            return Expanded(
+              child: TaskColumn(
+                status: status,
+                bg: bg,
+                tasks: tasks,
+                onAccept: (task) {
+                  vm.moveTaskOptimistic(task, status);
+                  vm.setTaskStatus(task.id, status);
+                },
+                onEdit: (task) => _openTaskSheet(ctx, vm, task: task),
+              ),
+            );
+          }
 
-                                    if (!mounted) return;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: const Text('Tarea eliminada'),
-                                        action: SnackBarAction(
-                                          label: 'Deshacer',
-                                          onPressed: () async {
-                                            try {
-                                              final restoredTask = TaskModel(
-                                                id: deletedTask.id,
-                                                title: deletedTask.title,
-                                                description:
-                                                    deletedTask.description,
-                                                status: deletedTask.status,
-                                                eventId: deletedTask.eventId,
-                                                assignedTo:
-                                                    deletedTask.assignedTo,
-                                              );
-                                              vm.insertTaskAt(
-                                                restoredTask,
-                                                taskIndex,
-                                              );
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                    'Tarea restaurada',
-                                                  ),
-                                                ),
-                                              );
-                                            } catch (e) {
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                    'Error al restaurar tarea',
-                                                  ),
-                                                ),
-                                              );
-                                            }
-                                          },
-                                        ),
-                                      ),
-                                    );
-                                  } catch (e) {
-                                    if (!mounted) return;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Error al eliminar tarea',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
-                              );
-                            },
-                          ),
+          /* Scaffold */
+          return Scaffold(
+            appBar: AppBar(
+              title: const SectionTitle('Checklist del evento'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () => _openTaskSheet(ctx, vm),
                 ),
               ],
-            );
-          },
-        ),
+            ),
+            body:
+                vm.isLoading
+                    ? const LinearProgressIndicator()
+                    : Padding(
+                      padding: const EdgeInsets.all(Spacing.horizontalMargin),
+                      child: Column(
+                        children: [
+                          buildColumn(
+                            status: 'pending',
+                            bg: _yellowPastel,
+                            tasks: pending,
+                          ),
+                          buildColumn(
+                            status: 'in_progress',
+                            bg: _bluePastel,
+                            tasks: inProg,
+                          ),
+                          buildColumn(
+                            status: 'completed',
+                            bg: _greenPastel,
+                            tasks: done,
+                          ),
+                          trash(),
+                        ],
+                      ),
+                    ),
+          );
+        },
       ),
     );
   }

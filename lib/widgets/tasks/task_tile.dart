@@ -1,33 +1,37 @@
+// lib/widgets/tasks/task_tile.dart
 import 'package:flutter/material.dart';
-import '../../../models/task_model.dart';
+import 'package:meetup/models/task_model.dart';
+import 'package:meetup/theme/theme.dart';
 
 class TaskTile extends StatelessWidget {
   final TaskModel task;
-  final Function(String newStatus) onStatusChange;
-  final VoidCallback onDelete;
-  final VoidCallback onEdit;
+
+  final VoidCallback? onEdit;
+
+  ///  Uso exclusivo como feedback mientras se arrastra
+  final bool readOnly;
 
   const TaskTile({
     super.key,
     required this.task,
-    required this.onStatusChange,
-    required this.onDelete,
-    required this.onEdit,
+    this.onEdit,
+    this.readOnly = false,
   });
 
-  Color _getStatusColor(String status) {
-    switch (status) {
+  // ---------- helpers visuales ----------
+  Color _statusColor(ColorScheme cs) {
+    switch (task.status) {
       case 'completed':
         return Colors.green;
       case 'in_progress':
-        return Colors.orange;
+        return Colors.blueAccent;
       default:
-        return Colors.grey;
+        return Colors.yellow.shade900;
     }
   }
 
-  IconData _getStatusIcon(String status) {
-    switch (status) {
+  IconData _statusIcon() {
+    switch (task.status) {
       case 'completed':
         return Icons.check_circle;
       case 'in_progress':
@@ -37,127 +41,68 @@ class TaskTile extends StatelessWidget {
     }
   }
 
-  String _getStatusLabel(String status) {
-    switch (status) {
+  String _statusLabel() {
+    switch (task.status) {
       case 'completed':
         return 'COMPLETADO';
       case 'in_progress':
-        return 'EN PROGRESO';
+        return 'EN PROGRESO';
       default:
         return 'PENDIENTE';
     }
   }
 
+  // ---------- UI ----------
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(task.status);
-    final statusIcon = _getStatusIcon(task.status);
-    final statusLabel = _getStatusLabel(task.status);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final bg = cs.surfaceContainerHighest;
+    final radius = BorderRadius.circular(12);
 
-    return Dismissible(
-      key: ValueKey(task.id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        padding: const EdgeInsets.only(right: 20),
-        alignment: Alignment.centerRight,
-        color: Colors.redAccent,
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      confirmDismiss: (_) async {
-        final confirmed =
-            await showDialog<bool>(
-              context: context,
-              builder:
-                  (ctx) => AlertDialog(
-                    title: const Text('Eliminar Tarea'),
-                    content: const Text(
-                      '¿Estás seguro de que quieres eliminar esta tarea?',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx, false),
-                        child: const Text('Cancelar'),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx, true),
-                        child: const Text('Eliminar'),
-                      ),
-                    ],
-                  ),
-            ) ??
-            false;
-        if (confirmed) {
-          onDelete(); // <- elimina la tarea de la lista
-        }
-        return false; // <- previene que el widget se elimine automáticamente
-      },
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 8,
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: Spacing.spacingSmall),
+      decoration: BoxDecoration(color: bg, borderRadius: radius),
+      padding: const EdgeInsets.all(Spacing.spacingMedium),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // icono de estado
+          Padding(
+            padding: const EdgeInsets.only(top: Spacing.spacingXSmall),
+            child: Icon(_statusIcon(), color: _statusColor(cs), size: 28),
           ),
-          leading: Icon(statusIcon, color: statusColor, size: 30),
-          title: Text(
-            task.title,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Estado: $statusLabel',
-                style: TextStyle(color: statusColor),
-              ),
-              if (task.description != null && task.description!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    task.description!,
-                    style: const TextStyle(fontSize: 13, color: Colors.black87),
-                  ),
-                ),
-            ],
-          ),
-          trailing: SizedBox(
-            width: 96,
-            child: Row(
+          const SizedBox(width: Spacing.spacingMedium),
+          // texto
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.sync),
-                  tooltip: 'Cambiar estado',
-                  onSelected: onStatusChange,
-                  itemBuilder:
-                      (context) => [
-                        CheckedPopupMenuItem(
-                          value: 'pending',
-                          checked: task.status == 'pending',
-                          child: const Text('PENDIENTE'),
-                        ),
-                        CheckedPopupMenuItem(
-                          value: 'in_progress',
-                          checked: task.status == 'in_progress',
-                          child: const Text('EN PROGRESO'),
-                        ),
-                        CheckedPopupMenuItem(
-                          value: 'completed',
-                          checked: task.status == 'completed',
-                          child: const Text('COMPLETADO'),
-                        ),
-                      ],
+                Text(task.title, style: tt.titleLarge),
+                const SizedBox(height: Spacing.spacingXSmall),
+                Text(
+                  _statusLabel(),
+                  style: tt.bodySmall!.copyWith(
+                    color: _statusColor(cs),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.blue),
-                  onPressed: onEdit,
-                  tooltip: 'Editar tarea',
-                ),
+                if (task.description != null &&
+                    task.description!.isNotEmpty) ...[
+                  const SizedBox(height: Spacing.spacingXSmall),
+                  Text(task.description!, style: tt.bodyMedium),
+                ],
               ],
             ),
           ),
-        ),
+          if (!readOnly && onEdit != null)
+            IconButton(
+              icon: const Icon(Icons.edit),
+              tooltip: 'Editar',
+              onPressed: onEdit,
+            ),
+        ],
       ),
     );
   }
