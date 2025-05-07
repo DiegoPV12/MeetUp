@@ -1,17 +1,16 @@
-// lib/views/event_detail_view.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:meetup/widgets/event_details/task_tab.dart';
 import 'package:provider/provider.dart';
-import 'package:meetup/theme/theme.dart';
-import 'package:meetup/widgets/event_details/event_header.dart';
-import 'package:meetup/widgets/event_details/status_badge.dart';
-import 'package:meetup/widgets/event_details/apptab.dart';
-import 'package:meetup/widgets/event_details/detail_tab_section.dart';
-import 'package:meetup/widgets/event_details/general_tab.dart';
-import 'package:meetup/widgets/event_details/rsvp_tab.dart';
-import 'package:meetup/widgets/event_details/budget_tab.dart';
 import '../viewmodels/event_detail_viewmodel.dart';
+import '../theme/theme.dart';
+import '../widgets/event_details/event_header.dart';
+import '../widgets/event_details/status_badge.dart';
+import '../widgets/event_details/apptab.dart';
+import '../widgets/event_details/detail_tab_section.dart';
+import '../widgets/event_details/general_tab.dart';
+import '../widgets/event_details/rsvp_tab.dart';
+import '../widgets/event_details/budget_tab.dart';
+import '../widgets/event_details/task_tab.dart';
 
 class EventDetailView extends StatelessWidget {
   final String eventId;
@@ -56,7 +55,7 @@ class EventDetailView extends StatelessWidget {
               return Center(
                 child: Text(
                   'Error al cargar el evento',
-                  style: Theme.of(context).textTheme.bodyLarge,
+                  style: Theme.of(ctx).textTheme.bodyLarge,
                 ),
               );
             }
@@ -69,7 +68,7 @@ class EventDetailView extends StatelessWidget {
                     : 'assets/images/4.png';
 
             return DefaultTabController(
-              length: 3,
+              length: 4, // ← ahora son 4 pestañas
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -84,7 +83,7 @@ class EventDetailView extends StatelessWidget {
                         Expanded(
                           child: Text(
                             e.name,
-                            style: Theme.of(context).textTheme.headlineMedium,
+                            style: Theme.of(ctx).textTheme.headlineMedium,
                           ),
                         ),
                         StatusBadge(cancelled),
@@ -100,8 +99,8 @@ class EventDetailView extends StatelessWidget {
                     ),
                     child: Text(
                       e.category[0].toUpperCase() + e.category.substring(1),
-                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      style: Theme.of(ctx).textTheme.bodyLarge!.copyWith(
+                        color: Theme.of(ctx).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -116,6 +115,10 @@ class EventDetailView extends StatelessWidget {
                       tabs: const [
                         Tab(icon: Icon(Icons.info_outline), text: 'General'),
                         Tab(icon: Icon(Icons.people_outline), text: 'RSVP'),
+                        Tab(
+                          icon: Icon(Icons.checklist_outlined), // nueva pestaña
+                          text: 'Tareas',
+                        ),
                         Tab(
                           icon: Icon(Icons.account_balance_wallet_outlined),
                           text: 'Presupuesto',
@@ -132,9 +135,9 @@ class EventDetailView extends StatelessWidget {
                           endTime: e.endTime,
                           location: e.location,
                         ),
-                        RsvpTab(confirmed: 12, total: 20),
-                        TaskTab(eventId),
-                        BudgetTab(spent: 3000, budget: 5000),
+                        const RsvpTab(confirmed: 12, total: 20),
+                        TaskTab(e.id),
+                        const BudgetTab(spent: 3000, budget: 5000),
                       ],
                     ),
                   ),
@@ -148,6 +151,7 @@ class EventDetailView extends StatelessWidget {
             if (vm.event == null) return const SizedBox.shrink();
             final e = vm.event!;
             final cancelled = e.isCancelled ?? false;
+
             return SpeedDial(
               icon: Icons.menu,
               activeIcon: Icons.close,
@@ -170,13 +174,13 @@ class EventDetailView extends StatelessWidget {
                   child: Icon(cancelled ? Icons.undo : Icons.cancel_outlined),
                   label: cancelled ? 'Reactivar' : 'Cancelar',
                   onTap: () async {
-                    final confirm = await _showConfirmationDialog(
+                    final ok = await _showConfirmationDialog(
                       ctx,
                       cancelled
                           ? '¿Reactivar este evento?'
                           : '¿Cancelar este evento?',
                     );
-                    if (confirm) {
+                    if (ok) {
                       await vm.toggleCancelEvent(
                         e.id,
                         isCurrentlyCancelled: cancelled,
@@ -188,11 +192,11 @@ class EventDetailView extends StatelessWidget {
                   child: const Icon(Icons.delete),
                   label: 'Eliminar',
                   onTap: () async {
-                    final confirm = await _showConfirmationDialog(
+                    final ok = await _showConfirmationDialog(
                       ctx,
                       '¿Eliminar este evento? Esta acción no se puede deshacer.',
                     );
-                    if (confirm) {
+                    if (ok) {
                       await vm.deleteEvent(e.id);
                       Navigator.pop(ctx, true);
                     }

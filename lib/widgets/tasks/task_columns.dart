@@ -1,4 +1,3 @@
-// lib/widgets/tasks/task_column.dart
 import 'package:flutter/material.dart';
 import 'package:meetup/models/task_model.dart';
 import 'package:meetup/theme/theme.dart';
@@ -6,9 +5,10 @@ import 'package:meetup/widgets/tasks/task_tile_draggeable.dart';
 
 class TaskColumn extends StatefulWidget {
   final String status; // pending | in_progress | completed
-  final Color bg;
+  final Color bg; // color de fondo pastel
   final List<TaskModel> tasks;
-  final ValueChanged<TaskModel> onAccept; // Cambia estado en VM
+  final ValueChanged<TaskModel> onAccept; // cambia estado en VM
+  final ValueChanged<TaskModel>? onEdit; // ← NUEVO
 
   const TaskColumn({
     super.key,
@@ -16,6 +16,7 @@ class TaskColumn extends StatefulWidget {
     required this.bg,
     required this.tasks,
     required this.onAccept,
+    this.onEdit,
   });
 
   @override
@@ -28,15 +29,15 @@ class _TaskColumnState extends State<TaskColumn> {
   @override
   Widget build(BuildContext context) {
     return DragTarget<TaskModel>(
-      onWillAccept: (_) {
+      onWillAcceptWithDetails: (_) {
         setState(() => _hovering = true);
         return true;
       },
-      onLeave: (_) => setState(() => _hovering = false),
-      onAccept: (task) {
+      onAcceptWithDetails: (details) {
         setState(() => _hovering = false);
-        widget.onAccept(task);
+        widget.onAccept(details.data);
       },
+      onLeave: (_) => setState(() => _hovering = false),
       builder:
           (ctx, _, __) => AnimatedContainer(
             duration: const Duration(milliseconds: 200),
@@ -45,8 +46,8 @@ class _TaskColumnState extends State<TaskColumn> {
             decoration: BoxDecoration(
               color:
                   _hovering
-                      ? widget.bg.withValues(alpha: 0.6)
-                      : widget.bg, // Resalta al hacer hover
+                      ? widget.bg.withValues(alpha: 0.7)
+                      : widget.bg, // resaltado al hacer hover
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -54,9 +55,7 @@ class _TaskColumnState extends State<TaskColumn> {
               children: [
                 Text(
                   _titleForStatus(widget.status),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleLarge!,
                 ),
                 const SizedBox(height: Spacing.spacingMedium),
                 Expanded(
@@ -70,7 +69,13 @@ class _TaskColumnState extends State<TaskColumn> {
                           (_, __) =>
                               const SizedBox(height: Spacing.spacingSmall),
                       itemBuilder:
-                          (_, i) => TaskTileDraggable(task: widget.tasks[i]),
+                          (_, i) => TaskTileDraggable(
+                            task: widget.tasks[i],
+                            onEdit:
+                                widget.onEdit == null
+                                    ? null
+                                    : () => widget.onEdit!(widget.tasks[i]),
+                          ),
                     ),
                   ),
                 ),
@@ -80,14 +85,9 @@ class _TaskColumnState extends State<TaskColumn> {
     );
   }
 
-  String _titleForStatus(String s) {
-    switch (s) {
-      case 'completed':
-        return 'COMPLETADO';
-      case 'in_progress':
-        return 'EN PROGRESO';
-      default:
-        return 'PENDIENTE';
-    }
-  }
+  String _titleForStatus(String s) => switch (s) {
+    'completed' => 'COMPLETADO',
+    'in_progress' => 'EN PROGRESO',
+    _ => 'PENDIENTE',
+  };
 }

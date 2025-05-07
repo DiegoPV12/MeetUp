@@ -1,11 +1,16 @@
-// lib/views/task_board_view.dart
 import 'package:flutter/material.dart';
+import 'package:meetup/widgets/tasks/task_columns.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/task_model.dart';
 import '../../theme/theme.dart';
 import '../../viewmodels/task_viewmodel.dart';
-import '../../widgets/tasks/task_tile.dart';
+import '../../widgets/home/section_title.dart';
+
+/* colores pastel “semáforo” */
+const _yellowPastel = Color(0xFFFFF9C4); // PENDIENTE
+const _bluePastel = Color(0xFFBBDEFB); // EN PROGRESO
+const _greenPastel = Color(0xFFC8E6C9); // COMPLETADO
 
 class TaskBoardView extends StatefulWidget {
   final String eventId;
@@ -16,15 +21,15 @@ class TaskBoardView extends StatefulWidget {
 }
 
 class _TaskBoardViewState extends State<TaskBoardView> {
-  /* ─────────────── hoja modal NUEVA / EDITAR ─────────────── */
+  /* ─────────── hoja modal NUEVA / EDITAR ─────────── */
   void _openTaskSheet(
     BuildContext context,
     TaskViewModel vm, {
     TaskModel? task,
   }) {
     final isEdit = task != null;
-    final titleCtrl = TextEditingController(text: task?.title);
-    final descCtrl = TextEditingController(text: task?.description);
+    final tCtrl = TextEditingController(text: task?.title);
+    final dCtrl = TextEditingController(text: task?.description);
 
     showModalBottomSheet(
       context: context,
@@ -50,12 +55,12 @@ class _TaskBoardViewState extends State<TaskBoardView> {
                 ),
                 const SizedBox(height: Spacing.spacingLarge),
                 TextField(
-                  controller: titleCtrl,
+                  controller: tCtrl,
                   decoration: const InputDecoration(labelText: 'Título'),
                 ),
                 const SizedBox(height: Spacing.spacingMedium),
                 TextField(
-                  controller: descCtrl,
+                  controller: dCtrl,
                   maxLines: 2,
                   decoration: const InputDecoration(labelText: 'Descripción'),
                 ),
@@ -66,8 +71,8 @@ class _TaskBoardViewState extends State<TaskBoardView> {
                     icon: Icon(isEdit ? Icons.save : Icons.check),
                     label: Text(isEdit ? 'Guardar' : 'Crear'),
                     onPressed: () async {
-                      final title = titleCtrl.text.trim();
-                      final desc = descCtrl.text.trim();
+                      final title = tCtrl.text.trim();
+                      final desc = dCtrl.text.trim();
                       if (title.isEmpty || desc.isEmpty) {
                         ScaffoldMessenger.of(ctx).showSnackBar(
                           const SnackBar(content: Text('Completa los campos')),
@@ -77,7 +82,7 @@ class _TaskBoardViewState extends State<TaskBoardView> {
                       try {
                         if (isEdit) {
                           await vm.editTask(
-                            task!.id,
+                            task.id,
                             title,
                             desc,
                             widget.eventId,
@@ -104,144 +109,102 @@ class _TaskBoardViewState extends State<TaskBoardView> {
     );
   }
 
-  /* ───────────────── helpers visuales ───────────────── */
-  Widget _stageHeader(String text, Color color) => Container(
-    height: 32,
-    alignment: Alignment.centerLeft,
-    padding: const EdgeInsets.symmetric(horizontal: Spacing.spacingMedium),
-    child: Text(
-      text,
-      style: Theme.of(context).textTheme.titleSmall!.copyWith(
-        color: color,
-        fontWeight: FontWeight.bold,
-      ),
-    ),
-  );
+  /* ───────── diálogo de confirmación para papelera ───────── */
+  Future<bool> _confirmDelete(BuildContext ctx) async {
+    return await showDialog<bool>(
+          context: ctx,
+          builder:
+              (_) => AlertDialog(
+                title: const Text('Eliminar tarea'),
+                content: const Text(
+                  '¿Estás seguro de que deseas eliminar la tarea?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('Cancelar'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text('Eliminar'),
+                  ),
+                ],
+              ),
+        ) ??
+        false;
+  }
 
+  /* ────────────────────────── build ────────────────────────── */
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => TaskViewModel()..loadTasks(widget.eventId),
       child: Consumer<TaskViewModel>(
         builder: (ctx, vm, _) {
+          /* separar por estado */
           final pending = vm.tasks.where((t) => t.status == 'pending').toList();
           final inProg =
               vm.tasks.where((t) => t.status == 'in_progress').toList();
           final done = vm.tasks.where((t) => t.status == 'completed').toList();
 
-          final cs = Theme.of(ctx).colorScheme;
+          /* papelera */
+          Widget trash() {
+            final cs = Theme.of(ctx).colorScheme;
+            return DragTarget<TaskModel>(
+              onWillAcceptWithDetails: (_) => true,
+              onAcceptWithDetails: (details) async {
+                final task = details.data;
+                final original = task.status;
+                vm.moveTaskOptimistic(task, '__trash__');
+                final ok = await _confirmDelete(ctx);
+                if (ok) {
+                  await vm.deleteTask(task.id, widget.eventId);
+                } else {
+                  vm.revertTaskStatus(task, original);
+                }
+              },
+              builder:
+                  (_, __, ___) => Container(
+                    height: 60,
+                    margin: const EdgeInsets.only(top: Spacing.spacingMedium),
+                    decoration: BoxDecoration(
+                      color: cs.errorContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.delete,
+                      color: cs.onErrorContainer,
+                      size: 32,
+                    ),
+                  ),
+            );
+          }
 
-          /* ---------- un contenedor‑estado ---------- */
-          Widget stage({
-            required String label,
-            required Color color,
+          /* helper: crea una columna de tareas */
+          Widget buildColumn({
+            required String status,
+            required Color bg,
             required List<TaskModel> tasks,
-            required String newStatus,
           }) {
             return Expanded(
-              child: DragTarget<TaskModel>(
-                onWillAcceptWithDetails: (_) => true,
-                onAcceptWithDetails:
-                    (details) async =>
-                        vm.setTaskStatus(details.data.id, newStatus),
-                builder:
-                    (c, _, __) => Container(
-                      margin: const EdgeInsets.only(
-                        bottom: Spacing.spacingMedium,
-                      ),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerLowest,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: color.withValues(alpha: 0.4)),
-                      ),
-                      child: Column(
-                        children: [
-                          _stageHeader(label, color),
-                          const Divider(height: 1),
-                          Expanded(
-                            child:
-                                tasks.isEmpty
-                                    ? Center(
-                                      child: Text(
-                                        'Vacío',
-                                        style: Theme.of(ctx)
-                                            .textTheme
-                                            .bodyMedium!
-                                            .copyWith(color: cs.outline),
-                                      ),
-                                    )
-                                    : ListView.builder(
-                                      padding: const EdgeInsets.all(
-                                        Spacing.spacingSmall,
-                                      ),
-                                      itemCount: tasks.length,
-                                      itemBuilder: (_, i) {
-                                        final t = tasks[i];
-                                        return LongPressDraggable<TaskModel>(
-                                          data: t,
-                                          feedback: Material(
-                                            color: Colors.transparent,
-                                            child: SizedBox(
-                                              width:
-                                                  MediaQuery.of(
-                                                    context,
-                                                  ).size.width *
-                                                  .9,
-                                              child: TaskTile(
-                                                task: t,
-                                                readOnly: true,
-                                              ),
-                                            ),
-                                          ),
-                                          childWhenDragging:
-                                              const SizedBox.shrink(),
-                                          child: TaskTile(
-                                            task: t,
-                                            onEdit:
-                                                () => _openTaskSheet(
-                                                  ctx,
-                                                  vm,
-                                                  task: t,
-                                                ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                          ),
-                        ],
-                      ),
-                    ),
+              child: TaskColumn(
+                status: status,
+                bg: bg,
+                tasks: tasks,
+                onAccept: (task) {
+                  vm.moveTaskOptimistic(task, status);
+                  vm.setTaskStatus(task.id, status);
+                },
+                onEdit: (task) => _openTaskSheet(ctx, vm, task: task),
               ),
             );
           }
 
-          /* ---------- papelera ---------- */
-          final trash = DragTarget<TaskModel>(
-            onWillAcceptWithDetails: (_) => true,
-            onAcceptWithDetails:
-                (details) async =>
-                    vm.deleteTask(details.data.id, widget.eventId),
-            builder:
-                (_, __, ___) => Container(
-                  height: 60,
-                  margin: const EdgeInsets.only(top: Spacing.spacingMedium),
-                  decoration: BoxDecoration(
-                    color: cs.errorContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.delete,
-                    color: cs.onErrorContainer,
-                    size: 32,
-                  ),
-                ),
-          );
-
-          /* ---------- Scafold ---------- */
+          /* Scaffold */
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Checklist del evento'),
+              title: const SectionTitle('Checklist del evento'),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.add),
@@ -256,25 +219,22 @@ class _TaskBoardViewState extends State<TaskBoardView> {
                       padding: const EdgeInsets.all(Spacing.horizontalMargin),
                       child: Column(
                         children: [
-                          stage(
-                            label: 'PENDIENTE',
-                            color: cs.outline,
+                          buildColumn(
+                            status: 'pending',
+                            bg: _yellowPastel,
                             tasks: pending,
-                            newStatus: 'pending',
                           ),
-                          stage(
-                            label: 'EN PROGRESO',
-                            color: cs.secondary,
+                          buildColumn(
+                            status: 'in_progress',
+                            bg: _bluePastel,
                             tasks: inProg,
-                            newStatus: 'in_progress',
                           ),
-                          stage(
-                            label: 'COMPLETADO',
-                            color: cs.tertiary,
+                          buildColumn(
+                            status: 'completed',
+                            bg: _greenPastel,
                             tasks: done,
-                            newStatus: 'completed',
                           ),
-                          trash,
+                          trash(),
                         ],
                       ),
                     ),

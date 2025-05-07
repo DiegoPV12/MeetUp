@@ -6,7 +6,6 @@ import 'package:meetup/theme/theme.dart';
 class TaskTile extends StatelessWidget {
   final TaskModel task;
 
-  /// Abrir hoja de edición; opcional
   final VoidCallback? onEdit;
 
   ///  Uso exclusivo como feedback mientras se arrastra
@@ -23,11 +22,11 @@ class TaskTile extends StatelessWidget {
   Color _statusColor(ColorScheme cs) {
     switch (task.status) {
       case 'completed':
-        return cs.tertiary;
+        return Colors.green;
       case 'in_progress':
-        return cs.secondary;
+        return Colors.blueAccent;
       default:
-        return cs.outline;
+        return Colors.yellow.shade900;
     }
   }
 
@@ -80,7 +79,7 @@ class TaskTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(task.title, style: tt.titleMedium),
+                Text(task.title, style: tt.titleLarge),
                 const SizedBox(height: Spacing.spacingXSmall),
                 Text(
                   _statusLabel(),

@@ -2,9 +2,12 @@ class TaskModel {
   final String id;
   final String title;
   final String? description;
-  String status;
   final String eventId;
   final AssignedUser? assignedTo;
+
+  ///  `status` es mutable en la lógica actual, por eso lo mantenemos `var`
+  ///  (si prefieres inmutabilidad total, quítale el `var` y usa sólo copyWith)
+  String status;
 
   TaskModel({
     required this.id,
@@ -15,17 +18,35 @@ class TaskModel {
     this.assignedTo,
   });
 
-  factory TaskModel.fromJson(Map<String, dynamic> json) => TaskModel(
-    id: json['_id'],
-    title: json['title'],
-    description: json['description'],
-    status: json['status'],
-    eventId: json['event'],
+  /* ─────────────── JSON ─────────────── */
+  factory TaskModel.fromJson(Map<String, dynamic> j) => TaskModel(
+    id: j['_id'],
+    title: j['title'],
+    description: j['description'],
+    status: j['status'],
+    eventId: j['event'],
     assignedTo:
-        json['assignedTo'] != null
-            ? AssignedUser.fromJson(json['assignedTo'])
-            : null,
+        j['assignedTo'] != null ? AssignedUser.fromJson(j['assignedTo']) : null,
   );
+
+  /* ─────────────── copyWith ─────────────── */
+  TaskModel copyWith({
+    String? id,
+    String? title,
+    String? description,
+    String? status,
+    String? eventId,
+    AssignedUser? assignedTo,
+  }) {
+    return TaskModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      status: status ?? this.status,
+      eventId: eventId ?? this.eventId,
+      assignedTo: assignedTo ?? this.assignedTo,
+    );
+  }
 }
 
 class AssignedUser {
@@ -35,6 +56,6 @@ class AssignedUser {
 
   AssignedUser({required this.id, required this.name, required this.email});
 
-  factory AssignedUser.fromJson(Map<String, dynamic> json) =>
-      AssignedUser(id: json['_id'], name: json['name'], email: json['email']);
+  factory AssignedUser.fromJson(Map<String, dynamic> j) =>
+      AssignedUser(id: j['_id'], name: j['name'], email: j['email']);
 }
