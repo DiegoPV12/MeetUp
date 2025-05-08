@@ -25,6 +25,7 @@ class EventRequest {
       'category': category,
       'startTime': startTime.toIso8601String(),
       'imageUrl': imageUrl,
+      'budget': 0.0,
     };
 
     if (endTime != null) {

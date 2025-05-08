@@ -1,48 +1,57 @@
-// lib/views/widgets/event_detail/budget_tab.dart
 import 'package:flutter/material.dart';
-import 'package:meetup/theme/theme.dart';
-import 'package:meetup/widgets/event_details/section_header.dart';
+import 'package:meetup/models/edit_budget_arguments.dart';
 
 class BudgetTab extends StatelessWidget {
   final double spent;
   final double budget;
+  final String eventId;
 
-  const BudgetTab({super.key, required this.spent, required this.budget});
+  const BudgetTab({
+    super.key,
+    required this.spent,
+    required this.budget,
+    required this.eventId,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    final cs = Theme.of(context).colorScheme;
+    final validBudget = budget > 0 ? budget : 1; // evita división por 0
+    final percentage = spent / validBudget;
+    final safePercentage =
+        percentage.isFinite && !percentage.isNaN ? percentage : 0.0;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(Spacing.spacingLarge),
+    return Padding(
+      padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionHeader('Presupuesto'),
-          const SizedBox(height: Spacing.spacingLarge),
-          Center(
-            child: Text(
-              '\$${spent.toInt()} / \$${budget.toInt()}',
-              style: tt.headlineSmall,
-            ),
+          Text(
+            '\$${spent.toInt()} / \$${budget.toInt()}',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: Spacing.spacingXLarge),
+          const SizedBox(height: 16),
           LinearProgressIndicator(
-            value: spent / budget,
-            minHeight: Spacing.spacingSmall,
-            color: cs.primary,
-            backgroundColor: cs.secondaryContainer,
+            value: safePercentage.clamp(0.0, 1.0),
+            minHeight: 12,
+            backgroundColor: Colors.grey[300],
+            color:
+                safePercentage > 1.0
+                    ? Colors.red
+                    : (safePercentage > 0.75 ? Colors.orange : Colors.green),
           ),
-          const SizedBox(height: Spacing.spacingXLarge),
-          FilledButton(
-            onPressed: () => Navigator.pushNamed(context, '/budget'),
-            child: const Text('Ver Desglose'),
-          ),
-          const SizedBox(height: Spacing.spacingMedium),
-          OutlinedButton(
-            onPressed: () => Navigator.pushNamed(context, '/add-expense'),
-            child: const Text('Agregar Gasto'),
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                '/budget',
+                arguments: EditBudgetArguments(
+                  eventId: eventId,
+                  currentBudget: budget,
+                ),
+              );
+            },
+            icon: const Icon(Icons.edit),
+            label: const Text('Editar Presupuesto'),
           ),
         ],
       ),

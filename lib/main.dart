@@ -1,5 +1,8 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
+import 'package:meetup/models/edit_budget_arguments.dart';
 import 'package:meetup/theme/theme.dart';
 import 'package:meetup/viewmodels/auth_viewmodel.dart';
 import 'package:meetup/viewmodels/decider_viewmodel.dart';
@@ -10,6 +13,7 @@ import 'package:meetup/views/choose_event_creation_view.dart';
 import 'package:meetup/views/create_event_view.dart';
 import 'package:meetup/views/create_from_template_view.dart';
 import 'package:meetup/views/edit_event_view.dart';
+import 'package:meetup/views/event_budget_view.dart';
 import 'package:meetup/views/event_detail_view.dart';
 import 'package:meetup/views/list_events_view.dart';
 import 'package:meetup/views/task_list_view.dart';
@@ -73,6 +77,15 @@ class MeetUpApp extends StatelessWidget {
             final eventId =
                 ModalRoute.of(context)!.settings.arguments as String;
             return TaskBoardView(eventId: eventId);
+          },
+          '/budget': (context) {
+            final args =
+                ModalRoute.of(context)!.settings.arguments
+                    as EditBudgetArguments;
+            return EventBudgetView(
+              eventId: args.eventId,
+              currentBudget: args.currentBudget!,
+            );
           },
         },
       ),

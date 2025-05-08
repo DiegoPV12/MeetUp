@@ -9,6 +9,7 @@ class EventModel {
   final String? imageUrl; // Ahora opcional
   final String createdBy;
   final bool? isCancelled; // Ahora opcional
+  final double? budget;
 
   EventModel({
     required this.id,
@@ -21,10 +22,20 @@ class EventModel {
     this.imageUrl, // Opcional
     required this.createdBy,
     this.isCancelled, // Opcional
+    this.budget,
   });
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
     print('Recibiendo json del evento: $json');
+    double? parsedBudget;
+    try {
+      final rawBudget = json['budget'];
+      if (rawBudget != null) {
+        parsedBudget = (rawBudget as num).toDouble();
+      }
+    } catch (e) {
+      parsedBudget = null;
+    }
     return EventModel(
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
@@ -36,6 +47,7 @@ class EventModel {
       imageUrl: json['imageUrl'],
       createdBy: json['createdBy'] ?? '',
       isCancelled: json['isCancelled'],
+      budget: parsedBudget,
     );
   }
 }
