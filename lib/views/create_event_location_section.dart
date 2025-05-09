@@ -32,7 +32,7 @@ class LocationSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Ubicación', style: tt.headlineMedium),
+            Text('Ubicación y Categoría', style: tt.headlineMedium),
             const SizedBox(height: Spacing.spacingXSmall),
             Text(
               'Indica dónde se realizará y su categoría.',
@@ -50,7 +50,6 @@ class LocationSection extends StatelessWidget {
             const SizedBox(height: Spacing.spacingMedium),
 
             // Categoría
-            Text('Categoría', style: tt.titleMedium),
             const SizedBox(height: Spacing.spacingSmall),
             EventCategoryDropdown(
               selectedCategory: selectedCategory,

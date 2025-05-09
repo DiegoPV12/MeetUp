@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:meetup/widgets/expenses/expense_card.dart';
-import 'package:meetup/widgets/expenses/expense_form_bottom_sheet.dart';
+import 'package:meetup/widgets/expenses/budget_header.dart';
+import 'package:meetup/widgets/home/section_title.dart';
 import 'package:provider/provider.dart';
-import '../../viewmodels/budget_viewmodel.dart';
-import '../../viewmodels/expense_viewmodel.dart';
+import '../theme/theme.dart';
+import '../viewmodels/budget_viewmodel.dart';
+import '../viewmodels/expense_viewmodel.dart';
+import '../widgets/expenses/expense_card.dart';
+import '../widgets/expenses/expense_form_bottom_sheet.dart';
 
 class EventBudgetView extends StatefulWidget {
   final String eventId;
@@ -20,20 +23,44 @@ class EventBudgetView extends StatefulWidget {
 }
 
 class _EventBudgetViewState extends State<EventBudgetView> {
-  late TextEditingController _budgetController;
+  late final TextEditingController _ctrl;
 
   @override
   void initState() {
     super.initState();
-    _budgetController = TextEditingController(
-      text: widget.currentBudget.toStringAsFixed(2),
+    _ctrl = TextEditingController(
+      text: widget.currentBudget.toStringAsFixed(0),
     );
   }
 
   @override
   void dispose() {
-    _budgetController.dispose();
+    _ctrl.dispose();
     super.dispose();
+  }
+
+  /// Guarda presupuesto y devuelve TRUE al `Navigator.pop` si fue ok.
+  Future<void> _saveBudget(BuildContext ctx, BudgetViewModel vm) async {
+    final raw = _ctrl.text.trim();
+    final value = double.tryParse(raw);
+    if (value == null || value < 0) {
+      ScaffoldMessenger.of(
+        ctx,
+      ).showSnackBar(const SnackBar(content: Text('Ingrese un monto válido')));
+      return;
+    }
+    try {
+      await vm.updateEventBudget(widget.eventId, value);
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        ctx,
+      ).showSnackBar(const SnackBar(content: Text('Presupuesto guardado')));
+      Navigator.pop(ctx, true); // <-- avisa al caller para refrescar
+    } catch (_) {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        const SnackBar(content: Text('Error al guardar presupuesto')),
+      );
+    }
   }
 
   @override
@@ -46,14 +73,14 @@ class _EventBudgetViewState extends State<EventBudgetView> {
         ),
       ],
       child: Scaffold(
-        appBar: AppBar(title: const Text('Presupuesto y Gastos')),
+        appBar: AppBar(title: const SectionTitle('Presupuesto y gastos')),
         floatingActionButton: Consumer<ExpenseViewModel>(
           builder:
-              (context, vm, _) => FloatingActionButton(
+              (_, expVM, __) => FloatingActionButton(
                 onPressed: () {
                   showExpenseFormBottomSheet(
                     context,
-                    vm,
+                    expVM,
                     eventId: widget.eventId,
                   );
                 },
@@ -61,155 +88,114 @@ class _EventBudgetViewState extends State<EventBudgetView> {
               ),
         ),
         body: Consumer2<BudgetViewModel, ExpenseViewModel>(
-          builder: (context, budgetVM, expenseVM, _) {
-            return Padding(
-              padding: const EdgeInsets.all(16),
+          builder: (_, budgetVM, expVM, __) {
+            final spent = expVM.expenses.fold<double>(
+              0,
+              (s, e) => s + e.amount,
+            );
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(
+                Spacing.spacingLarge,
+              ).copyWith(bottom: 100), // scroll-safe
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  /// A. Cabezal resumen grande
+                  BudgetHeader(spent: spent, budget: widget.currentBudget),
+                  const SizedBox(height: Spacing.spacingXLarge),
+
+                  /// A.2 Campo para cambiar presupuesto
                   TextField(
-                    controller: _budgetController,
-                    keyboardType: TextInputType.number,
+                    controller: _ctrl,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     decoration: const InputDecoration(
-                      labelText: 'Presupuesto Total',
+                      labelText: 'Presupuesto total',
                       prefixIcon: Icon(Icons.attach_money),
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: Spacing.spacingMedium),
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
+                    child: FilledButton.icon(
                       icon: const Icon(Icons.save),
-                      label: const Text('Guardar Presupuesto'),
-                      onPressed: () async {
-                        final input = _budgetController.text.trim();
-                        final amount = double.tryParse(input);
-                        if (amount == null || amount < 0) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Ingrese un monto válido'),
-                            ),
-                          );
-                          return;
-                        }
-                        try {
-                          await budgetVM.updateEventBudget(
-                            widget.eventId,
-                            amount,
-                          );
-                          if (mounted) Navigator.pop(context, true);
-                        } catch (_) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Error al guardar el presupuesto'),
-                            ),
-                          );
-                        }
-                      },
+                      label: const Text('Guardar presupuesto'),
+                      onPressed: () => _saveBudget(context, budgetVM),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  const Divider(),
-                  const Text(
-                    'Gastos del Evento',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+
+                  const SizedBox(height: Spacing.spacingXLarge),
+                  Text(
+                    'Gastos',
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Total Gastado: \$${expenseVM.expenses.fold(0.0, (sum, e) => sum + e.amount).toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                  const SizedBox(height: Spacing.spacingSmall),
+
+                  /// C. Lista de gastos
+                  expVM.isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : expVM.expenses.isEmpty
+                      ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 32.0),
+                          child: Text('Sin gastos registrados'),
                         ),
+                      )
+                      : ListView.separated(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: expVM.expenses.length,
+                        separatorBuilder:
+                            (_, __) =>
+                                const SizedBox(height: Spacing.spacingSmall),
+                        itemBuilder: (_, i) {
+                          final e = expVM.expenses[i];
+                          return ExpenseCard(
+                            expense: e,
+                            onEdit:
+                                () => showExpenseFormBottomSheet(
+                                  context,
+                                  expVM,
+                                  eventId: widget.eventId,
+                                  existingExpense: e,
+                                ),
+                            onDelete: () async {
+                              final ok =
+                                  await showDialog<bool>(
+                                    context: context,
+                                    builder:
+                                        (ctx) => AlertDialog(
+                                          title: const Text('Eliminar gasto'),
+                                          content: const Text(
+                                            '¿Eliminar definitivamente?',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed:
+                                                  () =>
+                                                      Navigator.pop(ctx, false),
+                                              child: const Text('Cancelar'),
+                                            ),
+                                            TextButton(
+                                              onPressed:
+                                                  () =>
+                                                      Navigator.pop(ctx, true),
+                                              child: const Text('Eliminar'),
+                                            ),
+                                          ],
+                                        ),
+                                  ) ??
+                                  false;
+                              if (ok) {
+                                await expVM.deleteExpense(widget.eventId, e.id);
+                              }
+                            },
+                          );
+                        },
                       ),
-                    ),
-                  ),
-                  Expanded(
-                    child:
-                        expenseVM.isLoading
-                            ? const Center(child: CircularProgressIndicator())
-                            : expenseVM.expenses.isEmpty
-                            ? const Center(
-                              child: Text('Sin gastos registrados'),
-                            )
-                            : ListView.builder(
-                              itemCount: expenseVM.expenses.length,
-                              itemBuilder: (ctx, index) {
-                                final exp = expenseVM.expenses[index];
-
-                                return ExpenseCard(
-                                  expense: exp,
-                                  onEdit:
-                                      () => showExpenseFormBottomSheet(
-                                        context,
-                                        expenseVM,
-                                        eventId: widget.eventId,
-                                        existingExpense: exp,
-                                      ),
-                                  onDelete: () async {
-                                    final confirm = await showDialog<bool>(
-                                      context: context,
-                                      builder:
-                                          (ctx) => AlertDialog(
-                                            title: const Text('Eliminar Gasto'),
-                                            content: const Text(
-                                              '¿Deseas eliminar este gasto?',
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed:
-                                                    () => Navigator.pop(
-                                                      ctx,
-                                                      false,
-                                                    ),
-                                                child: const Text('Cancelar'),
-                                              ),
-                                              TextButton(
-                                                onPressed:
-                                                    () => Navigator.pop(
-                                                      ctx,
-                                                      true,
-                                                    ),
-                                                child: const Text('Eliminar'),
-                                              ),
-                                            ],
-                                          ),
-                                    );
-
-                                    if (confirm == true) {
-                                      try {
-                                        await expenseVM.deleteExpense(
-                                          widget.eventId,
-                                          exp.id,
-                                        );
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text('Gasto eliminado'),
-                                          ),
-                                        );
-                                      } catch (_) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Error al eliminar gasto',
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    }
-                                  },
-                                );
-                              },
-                            ),
-                  ),
                 ],
               ),
             );

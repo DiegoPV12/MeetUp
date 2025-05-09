@@ -131,7 +131,7 @@ void showExpenseFormBottomSheet(
                             if (isEdit) {
                               await vm.editExpense(
                                 eventId,
-                                existingExpense!.copyWith(
+                                existingExpense.copyWith(
                                   name: name,
                                   amount: amount,
                                   category: selectedCategory!,

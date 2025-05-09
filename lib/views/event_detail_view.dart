@@ -138,9 +138,9 @@ class EventDetailView extends StatelessWidget {
                         const RsvpTab(confirmed: 12, total: 20),
                         TaskTab(e.id),
                         BudgetTab(
-                          spent: 0,
-                          budget: e.budget ?? 0,
                           eventId: e.id,
+                          budget: e.budget ?? 0,
+                          eventStartDate: e.startTime,
                         ),
                       ],
                     ),
