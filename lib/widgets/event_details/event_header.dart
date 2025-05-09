@@ -17,7 +17,7 @@ class EventHeader extends StatelessWidget {
           imagePath,
           height: 280,
           width: double.infinity,
-          fit: BoxFit.contain,
+          fit: BoxFit.fitHeight,
         ),
         // Oscurecer un poco
         Container(color: Colors.black26),
