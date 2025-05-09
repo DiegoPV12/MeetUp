@@ -1,12 +1,12 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:meetup/models/edit_budget_arguments.dart';
 import 'package:meetup/theme/theme.dart';
 import 'package:meetup/viewmodels/auth_viewmodel.dart';
 import 'package:meetup/viewmodels/decider_viewmodel.dart';
+import 'package:meetup/viewmodels/event_detail_viewmodel.dart';
 import 'package:meetup/viewmodels/event_viewmodel.dart';
+import 'package:meetup/viewmodels/expense_viewmodel.dart';
 import 'package:meetup/viewmodels/task_viewmodel.dart';
 import 'package:meetup/viewmodels/user_viewmodel.dart';
 import 'package:meetup/views/choose_event_creation_view.dart';
@@ -43,6 +43,8 @@ class MeetUpApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DeciderViewModel()),
         ChangeNotifierProvider(create: (_) => EventViewModel()),
         ChangeNotifierProvider(create: (_) => TaskViewModel()),
+        ChangeNotifierProvider(create: (_) => ExpenseViewModel()),
+        ChangeNotifierProvider(create: (_) => EventDetailViewModel()),
       ],
       child: MaterialApp(
         // Device Preview settings

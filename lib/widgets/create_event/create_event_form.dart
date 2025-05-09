@@ -1,4 +1,3 @@
-// lib/views/create_event/create_event_form_wizard.dart
 import 'package:flutter/material.dart';
 import 'package:meetup/theme/theme.dart';
 import 'package:meetup/viewmodels/event_viewmodel.dart';
@@ -17,19 +16,17 @@ class CreateEventFormWizard extends StatefulWidget {
 }
 
 class _CreateEventFormWizardState extends State<CreateEventFormWizard> {
-  // Paso actual
   int _step = 0;
 
-  // FormKeys de secciones con TextFormFields
   final _formKeys = List<GlobalKey<FormState>>.generate(
     2,
     (_) => GlobalKey<FormState>(),
   );
 
-  // Controladores / datos
   final _nameCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
   final _locCtrl = TextEditingController();
+
   String? _category;
   DateTime? _date;
   TimeOfDay? _startTime;
@@ -38,15 +35,13 @@ class _CreateEventFormWizardState extends State<CreateEventFormWizard> {
 
   final _stepLabels = const ['Detalles', 'Ubicación', 'Fecha y hora', 'Imagen'];
 
-  // ---------- Navegación ----------
+  /* ───────── navegación ───────── */
   void _next() {
     if (_step < 2 && !_formKeys[_step].currentState!.validate()) return;
-
     if (_step == 2 && (_date == null || _startTime == null)) {
       _showMsg('Selecciona fecha y hora de inicio');
       return;
     }
-
     if (_step == 3) {
       _submit();
       return;
@@ -58,7 +53,7 @@ class _CreateEventFormWizardState extends State<CreateEventFormWizard> {
     if (_step > 0) setState(() => _step--);
   }
 
-  // ---------- Utilidades ----------
+  /* ───────── util ───────── */
   void _showMsg(String m) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
 
@@ -101,14 +96,19 @@ class _CreateEventFormWizardState extends State<CreateEventFormWizard> {
         endTime: end,
         imageUrl: _image!,
       );
-      _showMsg('Evento creado exitosamente');
-      if (context.mounted) Navigator.pop(context, true);
+      _showMsg('Evento creado');
+      if (!mounted) return;
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/events',
+        ModalRoute.withName('/home'),
+      );
     } catch (_) {
       _showMsg('Error al crear evento');
     }
   }
 
-  // ---------- Build ----------
+  /* ───────── build ───────── */
   @override
   Widget build(BuildContext context) {
     final pages = [
@@ -141,15 +141,16 @@ class _CreateEventFormWizardState extends State<CreateEventFormWizard> {
 
     return Scaffold(
       appBar: AppBar(title: const SectionTitle('Crear Evento')),
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: Column(
           children: [
-            // Indicador con texto
+            /* indicador + texto */
             Padding(
               padding: const EdgeInsets.all(Spacing.spacingMedium),
               child: Row(
                 children: List.generate(_stepLabels.length, (i) {
-                  final selected = i == _step;
+                  final sel = i == _step;
                   return Expanded(
                     child: Column(
                       children: [
@@ -170,9 +171,9 @@ class _CreateEventFormWizardState extends State<CreateEventFormWizard> {
                           style: Theme.of(
                             context,
                           ).textTheme.labelLarge!.copyWith(
-                            color: selected ? cs.primary : cs.onSurfaceVariant,
+                            color: sel ? cs.primary : cs.onSurfaceVariant,
                             fontWeight:
-                                selected ? FontWeight.bold : FontWeight.normal,
+                                sel ? FontWeight.bold : FontWeight.normal,
                           ),
                         ),
                       ],
@@ -182,42 +183,49 @@ class _CreateEventFormWizardState extends State<CreateEventFormWizard> {
               ),
             ),
 
-            // Contenido de la sección actual
-            Expanded(child: pages[_step]),
-
-            // Botones navegación
-            Padding(
-              padding: const EdgeInsets.all(Spacing.spacingMedium),
-              child: Row(
-                children: [
-                  if (_step > 0)
-                    FilledButton.tonalIcon(
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size(120, 48),
-                      ),
-                      onPressed: _back,
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Atrás'),
-                    ),
-                  const Spacer(),
-                  FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(140, 48),
-                    ),
-                    onPressed: _next,
-                    icon: Icon(
-                      _step == pages.length - 1
-                          ? Icons.check
-                          : Icons.arrow_forward,
-                    ),
-                    label: Text(
-                      _step == pages.length - 1 ? 'Crear' : 'Siguiente',
-                    ),
-                  ),
-                ],
+            /* contenido – envuelto en scroll para evitar overflow */
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: Spacing.spacingLarge),
+                child: pages[_step],
               ),
             ),
           ],
+        ),
+      ),
+
+      /* botones fijos, con padding que sigue el teclado */
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            Spacing.spacingMedium,
+            0,
+            Spacing.spacingMedium,
+            MediaQuery.of(context).viewInsets.bottom + Spacing.spacingMedium,
+          ),
+          child: Row(
+            children: [
+              if (_step > 0)
+                FilledButton.tonalIcon(
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(120, 48),
+                  ),
+                  onPressed: _back,
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('Atrás'),
+                ),
+              if (_step == 0) const SizedBox(width: 120), // mantiene alineación
+              const Spacer(),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(minimumSize: const Size(140, 48)),
+                onPressed: _next,
+                icon: Icon(
+                  _step == pages.length - 1 ? Icons.check : Icons.arrow_forward,
+                ),
+                label: Text(_step == pages.length - 1 ? 'Crear' : 'Siguiente'),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,26 +1,17 @@
-// lib/widgets/expenses/expense_card.dart
+// lib/widgets/expenses/expense_read_only_card.dart
 import 'package:flutter/material.dart';
-import '../../models/expense_model.dart';
-import '../../theme/theme.dart';
+import '../../../models/expense_model.dart';
+import '../../../theme/theme.dart';
 
-class ExpenseCard extends StatelessWidget {
+class ExpenseReadOnlyCard extends StatelessWidget {
   final ExpenseModel expense;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  const ExpenseCard({
-    super.key,
-    required this.expense,
-    required this.onEdit,
-    required this.onDelete,
-  });
+  const ExpenseReadOnlyCard({super.key, required this.expense});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: Spacing.spacingSmall),
+      margin: const EdgeInsets.only(bottom: Spacing.spacingSmall),
       padding: const EdgeInsets.all(Spacing.spacingMedium),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
@@ -28,7 +19,7 @@ class ExpenseCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Avatar igual
+          // Avatar coherente
           CircleAvatar(
             radius: 24,
             backgroundColor: cs.primaryContainer,
@@ -42,7 +33,7 @@ class ExpenseCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: Spacing.spacingMedium),
-          // Detalles ampliados
+          // Detalles
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,11 +46,6 @@ class ExpenseCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  expense.description ?? '',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 4),
-                Text(
                   _formatDate(expense.date),
                   style: Theme.of(
                     context,
@@ -68,33 +54,12 @@ class ExpenseCard extends StatelessWidget {
               ],
             ),
           ),
-          // Importe y acciones
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '\$${expense.amount.toStringAsFixed(2)}',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium!.copyWith(color: cs.error),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.edit, color: cs.primary),
-                    onPressed: onEdit,
-                    tooltip: 'Editar',
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.delete, color: cs.error),
-                    onPressed: onDelete,
-                    tooltip: 'Eliminar',
-                  ),
-                ],
-              ),
-            ],
+          // Importe
+          Text(
+            '\$${expense.amount.toStringAsFixed(0)}',
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge!.copyWith(color: cs.error),
           ),
         ],
       ),
