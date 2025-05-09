@@ -1,4 +1,4 @@
-// lib/widgets/event_details/budget/expense_read_only_card.dart
+// lib/widgets/expenses/expense_read_only_card.dart
 import 'package:flutter/material.dart';
 import '../../../models/expense_model.dart';
 import '../../../theme/theme.dart';
@@ -19,6 +19,7 @@ class ExpenseReadOnlyCard extends StatelessWidget {
       ),
       child: Row(
         children: [
+          // Avatar coherente
           CircleAvatar(
             radius: 24,
             backgroundColor: cs.primaryContainer,
@@ -32,6 +33,7 @@ class ExpenseReadOnlyCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: Spacing.spacingMedium),
+          // Detalles
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,7 +44,7 @@ class ExpenseReadOnlyCard extends StatelessWidget {
                     context,
                   ).textTheme.titleMedium!.copyWith(fontSize: 18),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   _formatDate(expense.date),
                   style: Theme.of(
@@ -52,12 +54,12 @@ class ExpenseReadOnlyCard extends StatelessWidget {
               ],
             ),
           ),
+          // Importe
           Text(
             '\$${expense.amount.toStringAsFixed(0)}',
-            style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-              fontWeight: FontWeight.w600,
-              color: Colors.redAccent.shade200,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge!.copyWith(color: cs.error),
           ),
         ],
       ),

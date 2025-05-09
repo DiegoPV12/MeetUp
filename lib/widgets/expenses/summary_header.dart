@@ -21,7 +21,7 @@ class SummaryHeader extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     Color barColor() {
-      if (pctUsed > 1) return cs.error;
+      if (pctUsed > 0.85) return cs.error;
       if (pctUsed > .65) return Colors.orange;
       return Colors.green;
     }

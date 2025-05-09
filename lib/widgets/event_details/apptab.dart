@@ -5,8 +5,9 @@ import 'package:meetup/theme/theme.dart';
 
 class AppTabBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Tab> tabs;
+  final TabController? controller; // <─ NUEVO  (opcional)
 
-  const AppTabBar({super.key, required this.tabs});
+  const AppTabBar({super.key, required this.tabs, this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -14,6 +15,7 @@ class AppTabBar extends StatelessWidget implements PreferredSizeWidget {
 
     return ButtonsTabBar(
       backgroundColor: cs.primary,
+      controller: controller, // <─ aquí
 
       unselectedBackgroundColor: cs.surfaceContainerHighest,
 
