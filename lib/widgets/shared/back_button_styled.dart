@@ -14,7 +14,7 @@ class BackButtonStyled extends StatelessWidget {
       shadowColor: cs.onSecondaryContainer,
       child: IconButton(
         icon: Icon(Icons.arrow_back, color: cs.primary),
-        onPressed: () => Navigator.pop(context),
+        onPressed: () => Navigator.pop(context, true),
       ),
     );
   }

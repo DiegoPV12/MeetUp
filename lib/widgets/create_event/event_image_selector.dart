@@ -19,6 +19,7 @@ class EventImageSelector extends StatelessWidget {
       '4.png',
       '5.png',
       '6.png',
+      '7.png',
     ];
 
     final cs = Theme.of(context).colorScheme;
