@@ -25,25 +25,10 @@ class _ExpenseDistributionPieChartState
     'logistics': 'assets/images/icon_logistics.png',
     'decoration': 'assets/images/icon_decoration.png',
     'music': 'assets/images/icon_music.png',
+    'marketing': 'assets/images/icon_marketing.png',
+    'transport': 'assets/images/icon_transport.png',
+    'other': 'assets/images/icon_other.png',
   };
-
-  // Traduce categoría a español
-  String _translateCategory(String key) {
-    switch (key) {
-      case 'food':
-        return 'Comida';
-      case 'catering':
-        return 'Banquete';
-      case 'logistics':
-        return 'Logística';
-      case 'decoration':
-        return 'Decoración';
-      case 'music':
-        return 'Música';
-      default:
-        return key[0].toUpperCase() + key.substring(1);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,8 +71,6 @@ class _ExpenseDistributionPieChartState
             final color =
                 PartyColors.categoryColors[i %
                     PartyColors.categoryColors.length];
-
-            final label = _translateCategory(entry.key);
 
             return PieChartSectionData(
               color: color,
