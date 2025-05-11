@@ -41,6 +41,23 @@ class EventDetailView extends StatelessWidget {
         false;
   }
 
+  String _translateCategory(String key) {
+    switch (key) {
+      case 'birthday':
+        return 'Cumpleaños';
+      case 'get-together':
+        return 'Junte';
+      case 'party':
+        return 'Fiesta';
+      case 'wedding':
+        return 'Boda';
+      case 'reunion':
+        return 'Reunión Familiar';
+      default:
+        return key; // fallback
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<EventDetailViewModel>(
@@ -98,7 +115,7 @@ class EventDetailView extends StatelessWidget {
                       0,
                     ),
                     child: Text(
-                      e.category[0].toUpperCase() + e.category.substring(1),
+                      _translateCategory(e.category),
                       style: Theme.of(ctx).textTheme.bodyLarge!.copyWith(
                         color: Theme.of(ctx).colorScheme.onSurfaceVariant,
                       ),

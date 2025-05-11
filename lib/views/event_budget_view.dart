@@ -138,15 +138,31 @@ class _EventBudgetViewState extends State<EventBudgetView>
                           final e = expVM.expenses[i];
                           return ExpenseCard(
                             expense: e,
+                            // ────────── EDITAR ──────────
                             onEdit: () {
+                              // abre el formulario (devuelve void)
                               showExpenseFormBottomSheet(
                                 context,
                                 expVM,
                                 eventId: widget.eventId,
                                 existingExpense: e,
                               );
+
+                              // refresca la lista optimistamente
                               _refresh();
+
+                              // feedback visual
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Gasto actualizado'),
+                                  backgroundColor: Colors.green,
+                                  behavior: SnackBarBehavior.fixed,
+                                  elevation: 4,
+                                ),
+                              );
                             },
+
+                            // ────────── ELIMINAR ──────────
                             onDelete: () async {
                               final ok =
                                   await showDialog<bool>(
@@ -176,9 +192,19 @@ class _EventBudgetViewState extends State<EventBudgetView>
                                         ),
                                   ) ??
                                   false;
+
                               if (ok) {
                                 await expVM.deleteExpense(widget.eventId, e.id);
                                 _refresh();
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Gasto eliminado'),
+                                    backgroundColor: Colors.red,
+                                    behavior: SnackBarBehavior.fixed,
+                                    elevation: 4,
+                                  ),
+                                );
                               }
                             },
                           );

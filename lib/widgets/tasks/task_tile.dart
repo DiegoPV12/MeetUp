@@ -41,17 +41,6 @@ class TaskTile extends StatelessWidget {
     }
   }
 
-  String _statusLabel() {
-    switch (task.status) {
-      case 'completed':
-        return 'COMPLETADO';
-      case 'in_progress':
-        return 'EN PROGRESO';
-      default:
-        return 'PENDIENTE';
-    }
-  }
-
   // ---------- UI ----------
   @override
   Widget build(BuildContext context) {
@@ -81,13 +70,7 @@ class TaskTile extends StatelessWidget {
               children: [
                 Text(task.title, style: tt.titleLarge),
                 const SizedBox(height: Spacing.spacingXSmall),
-                Text(
-                  _statusLabel(),
-                  style: tt.bodySmall!.copyWith(
-                    color: _statusColor(cs),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+
                 if (task.description != null &&
                     task.description!.isNotEmpty) ...[
                   const SizedBox(height: Spacing.spacingXSmall),

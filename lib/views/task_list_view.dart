@@ -51,7 +51,7 @@ class _TaskBoardViewState extends State<TaskBoardView> {
               children: [
                 Text(
                   isEdit ? 'Editar tarea' : 'Nueva tarea',
-                  style: Theme.of(ctx).textTheme.titleMedium,
+                  style: Theme.of(ctx).textTheme.titleLarge,
                 ),
                 const SizedBox(height: Spacing.spacingLarge),
                 TextField(
