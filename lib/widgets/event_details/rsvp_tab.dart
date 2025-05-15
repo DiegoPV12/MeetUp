@@ -6,8 +6,14 @@ import 'package:meetup/theme/theme.dart';
 class RsvpTab extends StatelessWidget {
   final int confirmed;
   final int total;
+  final String eventId;
 
-  const RsvpTab({super.key, required this.confirmed, required this.total});
+  const RsvpTab({
+    super.key,
+    required this.confirmed,
+    required this.total,
+    required this.eventId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,13 +54,10 @@ class RsvpTab extends StatelessWidget {
           ),
           const SizedBox(height: Spacing.spacingXLarge),
           FilledButton(
-            onPressed: () => Navigator.pushNamed(context, '/rsvp'),
+            onPressed:
+                () =>
+                    Navigator.pushNamed(context, '/guests', arguments: eventId),
             child: const Text('Ver Invitados'),
-          ),
-          const SizedBox(height: Spacing.spacingMedium),
-          OutlinedButton(
-            onPressed: () => Navigator.pushNamed(context, '/invite'),
-            child: const Text('Invitar Más'),
           ),
         ],
       ),

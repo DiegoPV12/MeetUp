@@ -15,6 +15,7 @@ import 'package:meetup/views/create_from_template_view.dart';
 import 'package:meetup/views/edit_event_view.dart';
 import 'package:meetup/views/event_budget_view.dart';
 import 'package:meetup/views/event_detail_view.dart';
+import 'package:meetup/views/guest_list_view.dart';
 import 'package:meetup/views/list_events_view.dart';
 import 'package:meetup/views/task_list_view.dart';
 import 'package:provider/provider.dart';
@@ -88,6 +89,11 @@ class MeetUpApp extends StatelessWidget {
               eventId: args.eventId,
               currentBudget: args.currentBudget!,
             );
+          },
+          '/guests': (context) {
+            final eventId =
+                ModalRoute.of(context)!.settings.arguments as String;
+            return GuestListView(eventId: eventId);
           },
         },
       ),

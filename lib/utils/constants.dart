@@ -9,6 +9,7 @@ class Constants {
   static const String events = '$baseUrl/api/events';
   static const String tasks = '$baseUrl/api/tasks';
   static const String expenses = '$baseUrl/api/expenses';
+  static const String guests = '$baseUrl/api/guests';
 
   // Headers comunes
   static const Map<String, String> jsonHeaders = {
