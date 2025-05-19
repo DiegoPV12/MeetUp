@@ -45,6 +45,7 @@ dependencies:
   flutter_speed_dial: ^7.0.0
   fl_chart: ^1.0.0
   flutter_svg: ^2.1.0
+  flutter_slidable: ^4.0.0
 
 dev_dependencies:
   flutter_test:

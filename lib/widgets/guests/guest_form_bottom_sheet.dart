@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meetup/widgets/event_details/section_header.dart';
 import '../../../models/guest_model.dart';
 import '../../../viewmodels/guest_viewmodel.dart';
 
@@ -30,10 +31,7 @@ void showGuestFormBottomSheet(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              isEdit ? 'Editar Invitado' : 'Nuevo Invitado',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            SectionHeader(isEdit ? 'Editar Invitado' : 'Nuevo Invitado'),
             const SizedBox(height: 12),
             TextField(
               controller: nameCtrl,
@@ -53,7 +51,7 @@ void showGuestFormBottomSheet(
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton.icon(
+              child: FilledButton.icon(
                 icon: const Icon(Icons.save),
                 label: Text(isEdit ? 'Actualizar' : 'Agregar'),
                 onPressed: () async {
