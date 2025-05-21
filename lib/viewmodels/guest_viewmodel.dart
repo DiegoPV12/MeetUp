@@ -60,4 +60,14 @@ class GuestViewModel extends ChangeNotifier {
     await _guestService.deleteGuest(id);
     await loadGuests(eventId);
   }
+
+  Future<void> sendInvitations(String eventId, String message) async {
+    await _guestService.sendInvitations(eventId, message);
+    await loadGuests(eventId);
+  }
+
+  Future<void> sendReminders(String eventId, String message) async {
+    await _guestService.sendReminders(eventId, message);
+    await loadGuests(eventId);
+  }
 }

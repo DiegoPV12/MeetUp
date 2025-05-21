@@ -66,4 +66,34 @@ class GuestService {
       throw Exception('Error al eliminar invitado');
     }
   }
+
+  Future<void> sendInvitations(String eventId, String message) async {
+    final token = await _getToken();
+    final res = await http.post(
+      Uri.parse('${Constants.guests}/$eventId/send-invitations'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'message': message}),
+    );
+    if (res.statusCode != 200) {
+      throw Exception('Error al enviar invitaciones');
+    }
+  }
+
+  Future<void> sendReminders(String eventId, String message) async {
+    final token = await _getToken();
+    final res = await http.post(
+      Uri.parse('${Constants.guests}/$eventId/send-reminders'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'message': message}),
+    );
+    if (res.statusCode != 200) {
+      throw Exception('Error al enviar recordatorios');
+    }
+  }
 }

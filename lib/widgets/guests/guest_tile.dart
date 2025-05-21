@@ -6,7 +6,6 @@ import '../../../models/guest_model.dart';
 class ExpandableGuestTile extends StatefulWidget {
   final GuestModel guest;
   final int index;
-  final VoidCallback onInvite;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final ValueChanged<String> onStatusChange;
@@ -15,7 +14,6 @@ class ExpandableGuestTile extends StatefulWidget {
     super.key,
     required this.guest,
     required this.index,
-    required this.onInvite,
     required this.onEdit,
     required this.onDelete,
     required this.onStatusChange,
@@ -200,29 +198,6 @@ class _ExpandableGuestTileState extends State<ExpandableGuestTile>
 
                       // empuja el botón Invitar al final
                       const Spacer(),
-
-                      // Botón Invitar
-                      InkWell(
-                        onTap: widget.onInvite,
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color:
-                                Theme.of(context).colorScheme.tertiaryContainer,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.send,
-                            size: 20,
-                            color:
-                                Theme.of(
-                                  context,
-                                ).colorScheme.onTertiaryContainer,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 12),

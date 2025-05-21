@@ -1,5 +1,6 @@
 // lib/views/guest_list_view.dart
 import 'package:flutter/material.dart';
+import 'package:meetup/widgets/guests/guest_actions_bar.dart';
 import 'package:meetup/widgets/home/section_title.dart';
 import 'package:provider/provider.dart';
 import '../models/guest_model.dart';
@@ -26,7 +27,10 @@ class GuestListView extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => GuestViewModel()..loadGuests(eventId),
       child: Scaffold(
-        appBar: AppBar(title: const SectionTitle('Invitados')),
+        appBar: AppBar(
+          title: const SectionTitle('Invitados'),
+          actions: [GuestActionsBar(eventId: eventId)],
+        ),
         floatingActionButton: Consumer<GuestViewModel>(
           builder:
               (_, vm, __) => FloatingActionButton(
@@ -140,9 +144,6 @@ class GuestListView extends StatelessWidget {
                                     eventId: guest.eventId,
                                   );
                                   await vm.updateGuest(updated);
-                                },
-                                onInvite: () {
-                                  // TODO: implementar envío de invitación
                                 },
                               );
                             },
