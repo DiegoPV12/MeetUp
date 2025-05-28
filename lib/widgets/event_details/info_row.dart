@@ -1,4 +1,3 @@
-// lib/views/widgets/event_details/info_row.dart
 import 'package:flutter/material.dart';
 import 'package:meetup/theme/theme.dart';
 

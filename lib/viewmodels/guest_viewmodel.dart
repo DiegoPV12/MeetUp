@@ -10,6 +10,11 @@ class GuestViewModel extends ChangeNotifier {
   String _statusFilter = 'all'; // 'all', 'pending', 'confirmed', 'declined'
   String get currentFilter => _statusFilter;
 
+  int get total => _allGuests.length;
+  int get confirmed => _allGuests.where((g) => g.status == 'confirmed').length;
+  int get pending => _allGuests.where((g) => g.status == 'pending').length;
+  int get declined => _allGuests.where((g) => g.status == 'declined').length;
+
   List<GuestModel> get guests {
     var filtered = _allGuests;
     if (_statusFilter != 'all') {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:meetup/widgets/event_details/schedule_tab.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/event_detail_viewmodel.dart';
 import '../theme/theme.dart';
@@ -85,7 +86,7 @@ class EventDetailView extends StatelessWidget {
                     : 'assets/images/4.png';
 
             return DefaultTabController(
-              length: 4, // ← ahora son 4 pestañas
+              length: 5, // ← ahora son 4 pestañas
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -133,13 +134,14 @@ class EventDetailView extends StatelessWidget {
                         Tab(icon: Icon(Icons.info_outline), text: 'General'),
                         Tab(icon: Icon(Icons.people_outline), text: 'RSVP'),
                         Tab(
-                          icon: Icon(Icons.checklist_outlined), // nueva pestaña
+                          icon: Icon(Icons.checklist_outlined),
                           text: 'Tareas',
                         ),
                         Tab(
                           icon: Icon(Icons.account_balance_wallet_outlined),
                           text: 'Presupuesto',
                         ),
+                        Tab(icon: Icon(Icons.schedule), text: 'Cronograma'),
                       ],
                     ),
                   ),
@@ -155,6 +157,7 @@ class EventDetailView extends StatelessWidget {
                         RsvpTab(eventId: eventId),
                         TaskTab(e.id),
                         BudgetTab(eventId: e.id, eventStartDate: e.startTime),
+                        ScheduleTab(e.id),
                       ],
                     ),
                   ),

@@ -9,6 +9,7 @@ import 'package:meetup/viewmodels/event_viewmodel.dart';
 import 'package:meetup/viewmodels/expense_viewmodel.dart';
 import 'package:meetup/viewmodels/task_viewmodel.dart';
 import 'package:meetup/viewmodels/user_viewmodel.dart';
+import 'package:meetup/views/activity_list_view.dart';
 import 'package:meetup/views/choose_event_creation_view.dart';
 import 'package:meetup/views/create_event_view.dart';
 import 'package:meetup/views/create_from_template_view.dart';
@@ -94,6 +95,11 @@ class MeetUpApp extends StatelessWidget {
             final eventId =
                 ModalRoute.of(context)!.settings.arguments as String;
             return GuestListView(eventId: eventId);
+          },
+          '/schedule': (context) {
+            final eventId =
+                ModalRoute.of(context)!.settings.arguments as String;
+            return ActivityListView(eventId: eventId);
           },
         },
       ),
