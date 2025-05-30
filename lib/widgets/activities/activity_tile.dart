@@ -96,7 +96,7 @@ class ActivityTile extends StatelessWidget {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    activity.location ?? 'Sin ubicación',
+                    activity.location,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: color.onSurface.withOpacity(0.7),
                     ),

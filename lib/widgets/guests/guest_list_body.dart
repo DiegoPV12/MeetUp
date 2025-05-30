@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/guest_model.dart';
 import '../../theme/theme.dart';
 import '../../viewmodels/guest_viewmodel.dart';
 import 'guest_form_bottom_sheet.dart';
@@ -98,12 +97,23 @@ class GuestListBody extends StatelessWidget {
                     ),
                     itemCount: vm.guests.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    // ───────────────── ListView de invitados ─────────────────
                     itemBuilder: (_, i) {
                       final guest = vm.guests[i];
+
                       return ExpandableGuestTile(
                         guest: guest,
                         index: i + 1,
-                        onDelete: () => vm.deleteGuest(guest.id, eventId),
+
+                        onInvite: () async {
+                          await vm.updateGuest(
+                            guest.copyWith(
+                              invitationSent: true,
+                              updatedAt: DateTime.now(),
+                            ),
+                          );
+                        },
+
                         onEdit:
                             () => showGuestFormBottomSheet(
                               context,
@@ -111,13 +121,13 @@ class GuestListBody extends StatelessWidget {
                               eventId: eventId,
                               existingGuest: guest,
                             ),
+
+                        onDelete: () => vm.deleteGuest(guest.id, eventId),
+
                         onStatusChange: (newStatus) async {
-                          final updated = GuestModel(
-                            id: guest.id,
-                            name: guest.name,
-                            email: guest.email,
+                          final updated = guest.copyWith(
                             status: newStatus,
-                            eventId: guest.eventId,
+                            updatedAt: DateTime.now(),
                           );
                           await vm.updateGuest(updated);
                         },

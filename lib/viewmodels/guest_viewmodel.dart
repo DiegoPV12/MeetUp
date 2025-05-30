@@ -75,4 +75,14 @@ class GuestViewModel extends ChangeNotifier {
     await _guestService.sendReminders(eventId, message);
     await loadGuests(eventId);
   }
+
+  Future<void> sendInvitationToGuest(GuestModel g) async {
+    await _guestService.sendSingleInvitation(g.id);
+
+    // marcamos invitación como enviada y refrescamos lista
+    await _guestService.updateGuest(
+      g.copyWith(invitationSent: true, updatedAt: DateTime.now()),
+    );
+    await loadGuests(g.eventId); // mantiene UI coherente
+  }
 }

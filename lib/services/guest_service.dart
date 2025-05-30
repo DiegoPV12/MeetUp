@@ -96,4 +96,18 @@ class GuestService {
       throw Exception('Error al enviar recordatorios');
     }
   }
+
+  Future<void> sendSingleInvitation(String guestId) async {
+    final token = await _getToken();
+    final res = await http.post(
+      Uri.parse('${Constants.guests}/$guestId/send-invitation'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+    if (res.statusCode != 200) {
+      throw Exception('Error al enviar la invitación');
+    }
+  }
 }
