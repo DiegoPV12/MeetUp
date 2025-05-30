@@ -8,6 +8,8 @@ class ExpandableGuestTile extends StatefulWidget {
   final int index;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onInvite; //<── vuelve
+
   final ValueChanged<String> onStatusChange;
 
   const ExpandableGuestTile({
@@ -17,6 +19,7 @@ class ExpandableGuestTile extends StatefulWidget {
     required this.onEdit,
     required this.onDelete,
     required this.onStatusChange,
+    required this.onInvite,
   });
 
   @override
@@ -171,7 +174,6 @@ class _ExpandableGuestTileState extends State<ExpandableGuestTile>
               padding: const EdgeInsets.only(top: 12),
               child: Column(
                 children: [
-                  // -- Fila de RSVP + Invitar --
                   Row(
                     children: [
                       if (widget.guest.status != 'pending')
@@ -196,8 +198,16 @@ class _ExpandableGuestTileState extends State<ExpandableGuestTile>
                           onTap: () => widget.onStatusChange('declined'),
                         ),
 
-                      // empuja el botón Invitar al final
                       const Spacer(),
+                      if (!widget.guest.invitationSent)
+                        CircleAction(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.tertiaryContainer,
+                          icon: Icons.send,
+                          iconColor:
+                              Theme.of(context).colorScheme.onTertiaryContainer,
+                          onTap: widget.onInvite,
+                        ),
                     ],
                   ),
                   const SizedBox(height: 12),

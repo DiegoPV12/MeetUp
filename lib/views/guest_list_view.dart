@@ -27,7 +27,10 @@ class GuestListView extends StatelessWidget {
             actions: [GuestActionsBar(eventId: eventId)],
           ),
           body: TabBarView(
-            children: [GuestListBody(eventId: eventId), GuestOverview()],
+            children: [
+              GuestListBody(eventId: eventId),
+              GuestOverviewView(eventId: eventId),
+            ],
           ),
           floatingActionButton: Consumer<GuestViewModel>(
             builder:
