@@ -16,7 +16,7 @@ class KpiCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     return Container(
-      width: 200,
+      width: 180,
       height: 100,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
