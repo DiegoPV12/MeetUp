@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:meetup/widgets/activities/activity_timeline_entry.dart';
 import 'package:meetup/widgets/event_details/section_header.dart';
-import 'package:meetup/widgets/activities/activity_tile.dart';
 import 'package:provider/provider.dart';
 import '../../../models/activity_model.dart';
 import '../../../theme/theme.dart';
@@ -38,7 +38,10 @@ class ScheduleTab extends StatelessWidget {
                     children:
                         sample
                             .map(
-                              (a) => ActivityTile(activity: a, readOnly: true),
+                              (a) => ActivityTimelineEntry(
+                                activity: a,
+                                readOnly: true,
+                              ),
                             )
                             .toList(),
                   ),

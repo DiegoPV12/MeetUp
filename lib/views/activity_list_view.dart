@@ -1,15 +1,17 @@
+// importaciones…
 import 'package:flutter/material.dart';
-import 'package:meetup/widgets/activities/activity_form_bottom_sheet.dart';
-import 'package:meetup/widgets/activities/activity_tile.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/activity_viewmodel.dart';
+import '../widgets/activities/activity_form_bottom_sheet.dart';
+import '../widgets/activities/activity_timeline.dart';
 
 class ActivityListView extends StatelessWidget {
   final String eventId;
   const ActivityListView({super.key, required this.eventId});
 
   Future<bool> _confirmDelete(BuildContext context) async {
-    return (await showDialog<bool>(
+    final res =
+        await showDialog<bool>(
           context: context,
           builder:
               (ctx) => AlertDialog(
@@ -31,8 +33,9 @@ class ActivityListView extends StatelessWidget {
                   ),
                 ],
               ),
-        )) ??
+        ) ??
         false;
+    return res;
   }
 
   @override
@@ -54,33 +57,31 @@ class ActivityListView extends StatelessWidget {
               ),
         ),
         body: Consumer<ActivityViewModel>(
-          builder: (context, vm, _) {
+          builder: (ctx, vm, _) {
             if (vm.isLoading) {
               return const Center(child: CircularProgressIndicator());
             }
             if (vm.activities.isEmpty) {
               return const Center(child: Text('No hay actividades aún'));
             }
-            return ListView.builder(
-              itemCount: vm.activities.length,
-              itemBuilder: (_, i) {
-                final a = vm.activities[i];
-                return ActivityTile(
-                  activity: a,
-                  onDelete: () async {
-                    final confirm = await _confirmDelete(context);
-                    if (confirm) {
-                      await vm.remove(a.id, eventId);
-                    }
-                  },
-                  onEdit:
-                      () => showActivityFormBottomSheet(
-                        context,
-                        vm,
-                        eventId: eventId,
-                        existing: a,
-                      ),
-                );
+
+            // Ordenar cronológicamente
+            final acts = [...vm.activities]
+              ..sort((a, b) => a.startTime.compareTo(b.startTime));
+
+            return ActivityTimeline(
+              activities: acts,
+              onEdit:
+                  (act) => showActivityFormBottomSheet(
+                    context,
+                    vm,
+                    eventId: eventId,
+                    existing: act,
+                  ),
+              onDelete: (act) async {
+                if (await _confirmDelete(context)) {
+                  await vm.remove(act.id, eventId);
+                }
               },
             );
           },
