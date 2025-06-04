@@ -1,16 +1,20 @@
 // lib/viewmodels/task_viewmodel.dart
 import 'package:flutter/material.dart';
+import 'package:meetup/models/collaborator_model.dart';
+import 'package:meetup/services/collaborator_service.dart';
 import '../models/task_model.dart';
 import '../services/task_service.dart';
 
 class TaskViewModel extends ChangeNotifier {
   final TaskService _svc = TaskService();
+  final CollaboratorService _collabSvc = CollaboratorService();
 
-  /* ─────────────────────  estado ───────────────────── */
   List<TaskModel> _tasks = [];
+  List<CollaboratorModel> _collaborators = [];
   bool _isLoading = false;
 
   List<TaskModel> get tasks => _tasks;
+  List<CollaboratorModel> get collaborators => _collaborators;
   bool get isLoading => _isLoading;
 
   /* ───────────────── cargar listado ───────────────── */
@@ -18,7 +22,16 @@ class TaskViewModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      _tasks = await _svc.getTasksByEvent(eventId);
+      final results = await Future.wait([
+        _svc.getTasksByEvent(eventId),
+        _collabSvc.getEventCollaborators(eventId),
+      ]);
+      _tasks = results[0] as List<TaskModel>;
+      _collaborators = results[1] as List<CollaboratorModel>;
+    } catch (e) {
+      _tasks = [];
+      _collaborators = [];
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -98,11 +111,17 @@ class TaskViewModel extends ChangeNotifier {
     }
   }
 
-  /*  ✨ alias opcional – por si en alguna parte antigua se sigue llamando
+  /*  alias opcional – por si en alguna parte antigua se sigue llamando
       a setTaskStatus(id, status). Mantiene compatibilidad.               */
   Future<void> setTaskStatus(String id, String newStatus) async {
     final task = _tasks.firstWhere((t) => t.id == id);
     moveTaskOptimistic(task, newStatus);
     await persistStatus(task, newStatus);
+  }
+
+  // asignar task a usuario
+  Future<void> assignTask(String taskId, String userId, String eventId) async {
+    await _svc.assignTaskToUser(taskId, userId);
+    await loadTasks(eventId); // Recarga la lista para reflejar el cambio
   }
 }

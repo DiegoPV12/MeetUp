@@ -6,6 +6,7 @@ class EventRequest {
   final DateTime startTime;
   final DateTime? endTime;
   final String imageUrl;
+  final List<String> collaborators;
 
   EventRequest({
     required this.name,
@@ -15,6 +16,7 @@ class EventRequest {
     required this.startTime,
     this.endTime,
     required this.imageUrl,
+    this.collaborators = const [],
   });
 
   Map<String, dynamic> toJson() {
@@ -26,6 +28,7 @@ class EventRequest {
       'startTime': startTime.toIso8601String(),
       'imageUrl': imageUrl,
       'budget': 0.0,
+      'collaborators': collaborators,
     };
 
     if (endTime != null) {

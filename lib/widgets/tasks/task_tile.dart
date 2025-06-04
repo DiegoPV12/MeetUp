@@ -71,11 +71,26 @@ class TaskTile extends StatelessWidget {
                 Text(task.title, style: tt.titleLarge),
                 const SizedBox(height: Spacing.spacingXSmall),
 
-                if (task.description != null &&
-                    task.description!.isNotEmpty) ...[
+                if (task.description.isNotEmpty) ...[
+                  Text(task.description, style: tt.bodyMedium),
                   const SizedBox(height: Spacing.spacingXSmall),
-                  Text(task.description!, style: tt.bodyMedium),
                 ],
+
+                // 👤 Mostrar colaborador asignado si existe
+                if (task.assignedUserName != null)
+                  Row(
+                    children: [
+                      const Icon(Icons.person_outline, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        task.assignedUserName!,
+                        style: tt.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),

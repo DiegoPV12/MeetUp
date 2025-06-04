@@ -1,61 +1,56 @@
 class TaskModel {
   final String id;
   final String title;
-  final String? description;
+  final String description;
+  final String status;
   final String eventId;
-  final AssignedUser? assignedTo;
-
-  ///  `status` es mutable en la lógica actual, por eso lo mantenemos `var`
-  ///  (si prefieres inmutabilidad total, quítale el `var` y usa sólo copyWith)
-  String status;
+  final String eventName;
+  final String? assignedUserId;
+  final String? assignedUserName;
+  final String? assignedUserEmail;
 
   TaskModel({
     required this.id,
     required this.title,
-    this.description,
+    required this.description,
     required this.status,
     required this.eventId,
-    this.assignedTo,
+    required this.eventName,
+    this.assignedUserId,
+    this.assignedUserName,
+    this.assignedUserEmail,
   });
 
-  /* ─────────────── JSON ─────────────── */
-  factory TaskModel.fromJson(Map<String, dynamic> j) => TaskModel(
-    id: j['_id'],
-    title: j['title'],
-    description: j['description'],
-    status: j['status'],
-    eventId: j['event'],
-    assignedTo:
-        j['assignedTo'] != null ? AssignedUser.fromJson(j['assignedTo']) : null,
-  );
+  factory TaskModel.fromJson(Map<String, dynamic> json) {
+    final event = json['event'] ?? {};
+    final assignedTo = json['assignedTo'];
 
-  /* ─────────────── copyWith ─────────────── */
-  TaskModel copyWith({
-    String? id,
-    String? title,
-    String? description,
-    String? status,
-    String? eventId,
-    AssignedUser? assignedTo,
-  }) {
     return TaskModel(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      status: status ?? this.status,
-      eventId: eventId ?? this.eventId,
-      assignedTo: assignedTo ?? this.assignedTo,
+      id: json['_id'],
+      title: json['title'],
+      description: json['description'],
+      status: json['status'],
+      eventId: event['_id'] ?? '',
+      eventName: event['name'] ?? '',
+      assignedUserId: assignedTo != null ? assignedTo['_id'] : null,
+      assignedUserName: assignedTo != null ? assignedTo['name'] : null,
+      assignedUserEmail: assignedTo != null ? assignedTo['email'] : null,
     );
   }
-}
 
-class AssignedUser {
-  final String id;
-  final String name;
-  final String email;
-
-  AssignedUser({required this.id, required this.name, required this.email});
-
-  factory AssignedUser.fromJson(Map<String, dynamic> j) =>
-      AssignedUser(id: j['_id'], name: j['name'], email: j['email']);
+  TaskModel copyWith({
+    String? status,
+  }) {
+    return TaskModel(
+      id: id,
+      title: title,
+      description: description,
+      status: status ?? this.status,
+      eventId: eventId,
+      eventName: eventName,
+      assignedUserId: assignedUserId,
+      assignedUserName: assignedUserName,
+      assignedUserEmail: assignedUserEmail,
+    );
+  }
 }

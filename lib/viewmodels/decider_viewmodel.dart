@@ -25,6 +25,7 @@ class DeciderViewModel extends ChangeNotifier {
       return false;
     }
 
+    debugPrint(token);
     final isValid = await _validateToken(token);
 
     _isLoading = false;

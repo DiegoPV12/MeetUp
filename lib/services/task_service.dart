@@ -16,6 +16,7 @@ class TaskService {
       Uri.parse('${Constants.tasks}/event/$eventId'),
       headers: {'Authorization': 'Bearer $token'},
     );
+    debugPrint(res.body);
     if (res.statusCode == 200) {
       final decoded = jsonDecode(res.body);
       final data = decoded['data'] as List;
@@ -103,6 +104,23 @@ class TaskService {
     if (res.statusCode != 200) {
       debugPrint('Error body: ${res.body}');
       throw Exception('Error al editar tarea');
+    }
+  }
+
+  Future<void> assignTaskToUser(String taskId, String userId) async {
+    final token = await _getToken();
+    final res = await http.patch(
+      Uri.parse('${Constants.tasks}/$taskId/assign'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'userId': userId}),
+    );
+
+    if (res.statusCode != 200) {
+      debugPrint('Error al asignar tarea: ${res.body}');
+      throw Exception('No se pudo asignar la tarea');
     }
   }
 }

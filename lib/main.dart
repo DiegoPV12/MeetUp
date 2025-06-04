@@ -3,6 +3,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:meetup/models/edit_budget_arguments.dart';
 import 'package:meetup/theme/theme.dart';
 import 'package:meetup/viewmodels/auth_viewmodel.dart';
+import 'package:meetup/viewmodels/collaborator_viewmodel.dart';
 import 'package:meetup/viewmodels/decider_viewmodel.dart';
 import 'package:meetup/viewmodels/event_detail_viewmodel.dart';
 import 'package:meetup/viewmodels/event_viewmodel.dart';
@@ -11,6 +12,7 @@ import 'package:meetup/viewmodels/task_viewmodel.dart';
 import 'package:meetup/viewmodels/user_viewmodel.dart';
 import 'package:meetup/views/activity_list_view.dart';
 import 'package:meetup/views/choose_event_creation_view.dart';
+import 'package:meetup/views/collaborator_list_view.dart';
 import 'package:meetup/views/create_event_view.dart';
 import 'package:meetup/views/create_from_template_view.dart';
 import 'package:meetup/views/edit_event_view.dart';
@@ -47,6 +49,7 @@ class MeetUpApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TaskViewModel()),
         ChangeNotifierProvider(create: (_) => ExpenseViewModel()),
         ChangeNotifierProvider(create: (_) => EventDetailViewModel()),
+        ChangeNotifierProvider(create: (_) => CollaboratorViewModel()),
       ],
       child: MaterialApp(
         // Device Preview settings
@@ -100,6 +103,13 @@ class MeetUpApp extends StatelessWidget {
             final eventId =
                 ModalRoute.of(context)!.settings.arguments as String;
             return ActivityListView(eventId: eventId);
+          },
+          '/collaborators': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map;
+            return CollaboratorView(
+              eventId: args['eventId'],
+              creatorId: args['creatorId'],
+            );
           },
         },
       ),
