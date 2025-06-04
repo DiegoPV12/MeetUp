@@ -79,6 +79,7 @@ class EventDetailView extends StatelessWidget {
             }
 
             final e = vm.event!;
+            final creatorId = e.createdBy;
             final cancelled = e.isCancelled ?? false;
             final imagePath =
                 (e.imageUrl?.isNotEmpty ?? false)
@@ -90,7 +91,11 @@ class EventDetailView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  EventHeader(imagePath: imagePath),
+                  EventHeader(
+                    imagePath: imagePath,
+                    eventId: eventId,
+                    creatorId: creatorId,
+                  ),
                   const SizedBox(height: Spacing.spacingMedium),
                   Padding(
                     padding: const EdgeInsets.symmetric(

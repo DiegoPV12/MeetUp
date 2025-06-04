@@ -30,6 +30,7 @@ class _TaskBoardViewState extends State<TaskBoardView> {
     final isEdit = task != null;
     final tCtrl = TextEditingController(text: task?.title);
     final dCtrl = TextEditingController(text: task?.description);
+    String? selectedUserId = task?.assignedUserId; // ← clave aquí
 
     showModalBottomSheet(
       context: context,
@@ -46,64 +47,111 @@ class _TaskBoardViewState extends State<TaskBoardView> {
               bottom:
                   MediaQuery.of(ctx).viewInsets.bottom + Spacing.spacingLarge,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  isEdit ? 'Editar tarea' : 'Nueva tarea',
-                  style: Theme.of(ctx).textTheme.titleLarge,
-                ),
-                const SizedBox(height: Spacing.spacingLarge),
-                TextField(
-                  controller: tCtrl,
-                  decoration: const InputDecoration(labelText: 'Título'),
-                ),
-                const SizedBox(height: Spacing.spacingMedium),
-                TextField(
-                  controller: dCtrl,
-                  maxLines: 2,
-                  decoration: const InputDecoration(labelText: 'Descripción'),
-                ),
-                const SizedBox(height: Spacing.spacingLarge),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    icon: Icon(isEdit ? Icons.save : Icons.check),
-                    label: Text(isEdit ? 'Guardar' : 'Crear'),
-                    onPressed: () async {
-                      final title = tCtrl.text.trim();
-                      final desc = dCtrl.text.trim();
-                      if (title.isEmpty || desc.isEmpty) {
-                        ScaffoldMessenger.of(ctx).showSnackBar(
-                          const SnackBar(content: Text('Completa los campos')),
-                        );
-                        return;
-                      }
-                      try {
-                        if (isEdit) {
-                          await vm.editTask(
-                            task.id,
-                            title,
-                            desc,
-                            widget.eventId,
-                          );
-                        } else {
-                          await vm.addTask(widget.eventId, title, desc);
-                        }
-                        if (mounted) Navigator.pop(ctx);
-                      } catch (_) {
-                        ScaffoldMessenger.of(ctx).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              isEdit ? 'Error al actualizar' : 'Error al crear',
-                            ),
-                          ),
-                        );
-                      }
-                    },
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    isEdit ? 'Editar tarea' : 'Nueva tarea',
+                    style: Theme.of(ctx).textTheme.titleLarge,
                   ),
-                ),
-              ],
+                  const SizedBox(height: Spacing.spacingLarge),
+                  TextField(
+                    controller: tCtrl,
+                    decoration: const InputDecoration(labelText: 'Título'),
+                  ),
+                  const SizedBox(height: Spacing.spacingMedium),
+                  TextField(
+                    controller: dCtrl,
+                    maxLines: 2,
+                    decoration: const InputDecoration(labelText: 'Descripción'),
+                  ),
+                  const SizedBox(height: Spacing.spacingMedium),
+
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(
+                      labelText: 'Asignar a',
+                      prefixIcon: Icon(Icons.person),
+                    ),
+                    value: selectedUserId, // ← reflejamos el valor actual
+                    items:
+                        vm.collaborators.map((c) {
+                          return DropdownMenuItem<String>(
+                            value: c.id,
+                            child: Text('${c.name} (${c.email})'),
+                          );
+                        }).toList(),
+                    onChanged: (value) {
+                      selectedUserId = value;
+                    },
+                    isExpanded: true,
+                    hint: const Text('Sin asignar'),
+                  ),
+
+                  const SizedBox(height: Spacing.spacingLarge),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      icon: Icon(isEdit ? Icons.save : Icons.check),
+                      label: Text(isEdit ? 'Guardar' : 'Crear'),
+                      onPressed: () async {
+                        final title = tCtrl.text.trim();
+                        final desc = dCtrl.text.trim();
+                        if (title.isEmpty || desc.isEmpty) {
+                          ScaffoldMessenger.of(ctx).showSnackBar(
+                            const SnackBar(
+                              content: Text('Completa los campos'),
+                            ),
+                          );
+                          return;
+                        }
+                        try {
+                          if (isEdit) {
+                            await vm.editTask(
+                              task.id,
+                              title,
+                              desc,
+                              widget.eventId,
+                            );
+                            if (selectedUserId != null &&
+                                selectedUserId != task.assignedUserId) {
+                              await vm.assignTask(
+                                task.id,
+                                selectedUserId!,
+                                widget.eventId,
+                              );
+                            }
+                          } else {
+                            await vm.addTask(widget.eventId, title, desc);
+                            if (selectedUserId != null) {
+                              final createdTask = vm.tasks.lastWhere(
+                                (t) =>
+                                    t.title == title && t.description == desc,
+                              );
+                              await vm.assignTask(
+                                createdTask.id,
+                                selectedUserId!,
+                                widget.eventId,
+                              );
+                            }
+                          }
+                          if (mounted) Navigator.pop(ctx);
+                        } catch (_) {
+                          ScaffoldMessenger.of(ctx).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                isEdit
+                                    ? 'Error al actualizar'
+                                    : 'Error al crear',
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
     );

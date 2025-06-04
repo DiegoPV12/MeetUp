@@ -1,12 +1,19 @@
-// lib/views/widgets/event_detail/event_header.dart
 import 'package:flutter/material.dart';
 import 'package:meetup/widgets/shared/back_button_styled.dart';
 import 'package:meetup/theme/theme.dart';
+import 'package:meetup/widgets/shared/collaborators_button_styled.dart';
 
 class EventHeader extends StatelessWidget {
   final String imagePath;
+  final String eventId;
+  final String creatorId;
 
-  const EventHeader({super.key, required this.imagePath});
+  const EventHeader({
+    super.key,
+    required this.imagePath,
+    required this.eventId,
+    required this.creatorId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +26,22 @@ class EventHeader extends StatelessWidget {
           width: double.infinity,
           fit: BoxFit.fitHeight,
         ),
-        // Oscurecer un poco
+        // Capa semitransparente para oscurecer
         Container(color: Colors.black26),
-        // Back button
+        // Botones superiores
         SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(Spacing.spacingMedium),
-            child: BackButtonStyled(),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const BackButtonStyled(),
+                CollaboratorsButtonStyled(
+                  eventId: eventId,
+                  creatorId: creatorId,
+                ),
+              ],
+            ),
           ),
         ),
       ],

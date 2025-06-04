@@ -6,10 +6,11 @@ class EventModel {
   final String category;
   final DateTime startTime;
   final DateTime? endTime;
-  final String? imageUrl; // Ahora opcional
+  final String? imageUrl;
   final String createdBy;
-  final bool? isCancelled; // Ahora opcional
+  final bool? isCancelled;
   final double? budget;
+  final List<String> collaborators;
 
   EventModel({
     required this.id,
@@ -19,23 +20,32 @@ class EventModel {
     required this.category,
     required this.startTime,
     this.endTime,
-    this.imageUrl, // Opcional
+    this.imageUrl,
     required this.createdBy,
-    this.isCancelled, // Opcional
+    this.isCancelled,
     this.budget,
+    this.collaborators = const [],
   });
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
     print('Recibiendo json del evento: $json');
+
     double? parsedBudget;
     try {
       final rawBudget = json['budget'];
       if (rawBudget != null) {
         parsedBudget = (rawBudget as num).toDouble();
       }
-    } catch (e) {
+    } catch (_) {
       parsedBudget = null;
     }
+
+    final collaboratorList =
+        (json['collaborators'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        [];
+
     return EventModel(
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
@@ -48,6 +58,7 @@ class EventModel {
       createdBy: json['createdBy'] ?? '',
       isCancelled: json['isCancelled'],
       budget: parsedBudget,
+      collaborators: collaboratorList,
     );
   }
 }
