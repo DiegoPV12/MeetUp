@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meetup/services/task_service.dart';
 import '../models/event_request_model.dart';
 import '../models/event_model.dart';
 import '../services/event_service.dart';
@@ -21,8 +22,9 @@ class EventViewModel extends ChangeNotifier {
     required String location,
     required String category,
     required DateTime startTime,
-    DateTime? endTime, // <-- Ahora opcional
-    required String imageUrl, // <-- Ahora requerido
+    DateTime? endTime,
+    required String imageUrl,
+    String? template,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -34,10 +36,24 @@ class EventViewModel extends ChangeNotifier {
         location: location,
         category: category,
         startTime: startTime,
-        endTime: endTime, // <-- Puede ser null
-        imageUrl: imageUrl, // <-- Se envía el nombre de imagen
+        endTime: endTime,
+        imageUrl: imageUrl,
       );
-      await _eventService.createEvent(eventRequest);
+
+      final createdEventId = await _eventService.createEvent(eventRequest);
+
+      if (template != null) {
+        final taskService = TaskService();
+        final defaultTasks = _getDefaultTasksForCategory(template);
+
+        for (final task in defaultTasks) {
+          await taskService.createTask(
+            createdEventId,
+            task['title']!,
+            task['description']!,
+          );
+        }
+      }
     } catch (e) {
       rethrow;
     } finally {
@@ -73,6 +89,59 @@ class EventViewModel extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  List<Map<String, String>> _getDefaultTasksForCategory(String category) {
+    switch (category) {
+      case 'birthday':
+        return [
+          {
+            'title': 'Reservar salón de fiestas',
+            'description': 'Confirmar lugar para la fiesta.',
+          },
+          {
+            'title': 'Enviar invitaciones',
+            'description': 'Enviar invitaciones a todos los invitados.',
+          },
+          {
+            'title': 'Contratar animador',
+            'description': 'Buscar y contratar un animador infantil.',
+          },
+          {
+            'title': 'Comprar torta',
+            'description': 'Encargar torta de cumpleaños.',
+          },
+          {
+            'title': 'Organizar juegos',
+            'description': 'Planificar juegos y actividades para niños.',
+          },
+        ];
+      case 'get-together':
+        return [
+          {
+            'title': 'Definir lugar del encuentro',
+            'description': 'Escoger casa o local para el evento.',
+          },
+          {
+            'title': 'Armar playlist',
+            'description': 'Crear lista de música para ambientar.',
+          },
+          {
+            'title': 'Comprar snacks y bebidas',
+            'description': 'Hacer lista y comprar todo para picar.',
+          },
+          {
+            'title': 'Decorar espacio',
+            'description': 'Preparar decoración sencilla y acogedora.',
+          },
+          {
+            'title': 'Enviar recordatorio',
+            'description': 'Recordar a todos los invitados por WhatsApp.',
+          },
+        ];
+      default:
+        return [];
     }
   }
 }

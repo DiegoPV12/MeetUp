@@ -19,9 +19,7 @@ class CreateFromTemplateView extends StatelessWidget {
         'bgColor': cs.primaryContainer,
         'arrowColor': cs.onPrimaryContainer,
         'onTap': () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Plantilla Cumpleaños seleccionada')),
-          );
+          Navigator.pushNamed(context, '/create-event', arguments: 'birthday');
         },
       },
       {
@@ -31,8 +29,10 @@ class CreateFromTemplateView extends StatelessWidget {
         'bgColor': cs.secondaryContainer,
         'arrowColor': cs.onSecondaryContainer,
         'onTap': () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Plantilla Junte seleccionada')),
+          Navigator.pushNamed(
+            context,
+            '/create-event',
+            arguments: 'get-together',
           );
         },
       },
@@ -45,7 +45,11 @@ class CreateFromTemplateView extends StatelessWidget {
         'onTap': () {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Plantilla Reunión Familiar seleccionada'),
+              content: Text(
+                '✨ ¡La plantilla de Reunión Familiar estará disponible en la próxima actualización! ✨',
+                textAlign: TextAlign.center,
+              ),
+              duration: Duration(seconds: 3),
             ),
           );
         },
@@ -58,7 +62,13 @@ class CreateFromTemplateView extends StatelessWidget {
         'arrowColor': cs.onErrorContainer,
         'onTap': () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Plantilla Cena seleccionada')),
+            const SnackBar(
+              content: Text(
+                '✨ ¡La plantilla de Cena estará disponible en la próxima actualización! ✨',
+                textAlign: TextAlign.center,
+              ),
+              duration: Duration(seconds: 3),
+            ),
           );
         },
       },

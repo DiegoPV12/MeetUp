@@ -5,22 +5,25 @@ import 'package:provider/provider.dart';
 import 'package:meetup/viewmodels/event_viewmodel.dart';
 
 class CreateEventView extends StatelessWidget {
-  const CreateEventView({super.key});
+  final String? templateKey;
+  const CreateEventView({super.key, this.templateKey});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => EventViewModel(),
-      child: const CreateEventFormWrapper(),
+      child: CreateEventFormWrapper(templateKey: templateKey),
     );
   }
 }
 
 class CreateEventFormWrapper extends StatelessWidget {
-  const CreateEventFormWrapper({super.key});
+  final String? templateKey;
+  const CreateEventFormWrapper({super.key, this.templateKey});
+
   @override
   Widget build(BuildContext context) {
     final vm = Provider.of<EventViewModel>(context, listen: false);
-    return CreateEventFormWizard(eventViewModel: vm);
+    return CreateEventFormWizard(eventViewModel: vm, templateKey: templateKey);
   }
 }

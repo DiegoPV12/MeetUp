@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meetup/theme/theme.dart';
+import 'package:meetup/utils/event_templates.dart';
 import 'package:meetup/viewmodels/event_viewmodel.dart';
 import 'package:meetup/views/create_event_date_section.dart';
 import 'package:meetup/views/create_event_details_section.dart';
@@ -9,13 +10,32 @@ import 'package:meetup/widgets/home/section_title.dart';
 
 class CreateEventFormWizard extends StatefulWidget {
   final EventViewModel eventViewModel;
-  const CreateEventFormWizard({super.key, required this.eventViewModel});
+  final String? templateKey;
+  const CreateEventFormWizard({
+    super.key,
+    required this.eventViewModel,
+    this.templateKey,
+  });
 
   @override
   State<CreateEventFormWizard> createState() => _CreateEventFormWizardState();
 }
 
 class _CreateEventFormWizardState extends State<CreateEventFormWizard> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.templateKey != null) {
+      final template = EventTemplates.getForCategory(widget.templateKey);
+      if (template != null) {
+        _nameCtrl.text = template.name;
+        _descCtrl.text = template.description;
+        _image = template.imageUrl;
+        _category = widget.templateKey;
+      }
+    }
+  }
+
   int _step = 0;
 
   final _formKeys = List<GlobalKey<FormState>>.generate(
@@ -32,6 +52,7 @@ class _CreateEventFormWizardState extends State<CreateEventFormWizard> {
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
   String? _image;
+  bool _isSubmitting = false;
 
   final _stepLabels = const ['Detalles', 'Ubicación', 'Fecha y hora', 'Imagen'];
 
@@ -58,6 +79,7 @@ class _CreateEventFormWizardState extends State<CreateEventFormWizard> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
 
   Future<void> _submit() async {
+    if (_isSubmitting) return; // evita múltiples taps
     if (_image == null) {
       _showMsg('Selecciona una imagen');
       return;
@@ -86,6 +108,8 @@ class _CreateEventFormWizardState extends State<CreateEventFormWizard> {
       return;
     }
 
+    setState(() => _isSubmitting = true);
+
     try {
       await widget.eventViewModel.createEvent(
         name: _nameCtrl.text.trim(),
@@ -95,6 +119,7 @@ class _CreateEventFormWizardState extends State<CreateEventFormWizard> {
         startTime: start,
         endTime: end,
         imageUrl: _image!,
+        template: widget.templateKey,
       );
       _showMsg('Evento creado');
       if (!mounted) return;
@@ -105,6 +130,8 @@ class _CreateEventFormWizardState extends State<CreateEventFormWizard> {
       );
     } catch (_) {
       _showMsg('Error al crear evento');
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
@@ -206,23 +233,36 @@ class _CreateEventFormWizardState extends State<CreateEventFormWizard> {
           child: Row(
             children: [
               if (_step > 0)
-                FilledButton.tonalIcon(
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(120, 48),
+                if (!_isSubmitting)
+                  FilledButton.tonalIcon(
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(120, 48),
+                    ),
+                    onPressed: _back,
+                    icon: const Icon(Icons.arrow_back),
+                    label: const Text('Atrás'),
                   ),
-                  onPressed: _back,
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('Atrás'),
-                ),
               if (_step == 0) const SizedBox(width: 120), // mantiene alineación
               const Spacer(),
               FilledButton.icon(
                 style: FilledButton.styleFrom(minimumSize: const Size(140, 48)),
-                onPressed: _next,
-                icon: Icon(
-                  _step == pages.length - 1 ? Icons.check : Icons.arrow_forward,
+                onPressed:
+                    (_step == pages.length - 1 && _isSubmitting) ? null : _next,
+                icon:
+                    _step == pages.length - 1
+                        ? (_isSubmitting
+                            ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : const Icon(Icons.check))
+                        : const Icon(Icons.arrow_forward),
+                label: Text(
+                  _step == pages.length - 1
+                      ? (_isSubmitting ? 'Creando...' : 'Crear')
+                      : 'Siguiente',
                 ),
-                label: Text(_step == pages.length - 1 ? 'Crear' : 'Siguiente'),
               ),
             ],
           ),

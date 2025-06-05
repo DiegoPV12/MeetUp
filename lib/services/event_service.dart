@@ -9,18 +9,25 @@ import '../utils/constants.dart';
 class EventService {
   final _storage = const FlutterSecureStorage();
 
-  Future<void> createEvent(EventRequest eventRequest) async {
+  Future<String> createEvent(EventRequest request) async {
     final token = await _storage.read(key: 'jwt_token');
-    if (token == null) throw Exception('No hay token');
+    final body = jsonEncode(request.toJson());
 
-    final response = await http.post(
+    final res = await http.post(
       Uri.parse(Constants.events),
-      headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
-      body: jsonEncode(eventRequest.toJson()),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: body,
     );
 
-    if (response.statusCode != 201) {
-      throw Exception('Error al crear evento: ${response.body}');
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      final decoded = jsonDecode(res.body);
+      final eventId = decoded['data']['_id'];
+      return eventId;
+    } else {
+      throw Exception('Error al crear evento');
     }
   }
 

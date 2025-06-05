@@ -67,7 +67,10 @@ class MeetUpApp extends StatelessWidget {
           '/home': (context) => const HomeView(),
           '/choose-event-creation':
               (context) => const ChooseEventCreationView(),
-          '/create-event': (context) => const CreateEventView(),
+          '/create-event': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as String?;
+            return CreateEventView(templateKey: args);
+          },
           '/create-from-template': (context) => const CreateFromTemplateView(),
           '/events': (context) => const ListEventsView(),
           '/event-detail': (context) {
