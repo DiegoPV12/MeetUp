@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:meetup/models/event_request_model.dart';
@@ -40,12 +41,14 @@ class EventService {
     }
   }
 
-  Future<EventModel> fetchEventById(String eventId) async {
+  Future<EventModel> fetchEventById(String eventId, bool isCollaborator) async {
     final token = await _storage.read(key: 'jwt_token');
     if (token == null) throw Exception('No hay token');
 
+    String endpoint = isCollaborator ? '/as-collaborator' : '';
+
     final response = await http.get(
-      Uri.parse('${Constants.events}/$eventId'),
+      Uri.parse('${Constants.events}/$eventId$endpoint'),
       headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
     );
 
@@ -90,6 +93,23 @@ class EventService {
       throw Exception(
         'Error al ${isCurrentlyCancelled ? 'reactivar' : 'cancelar'} evento',
       );
+    }
+  }
+
+  Future<List<EventModel>> fetchEventsAsCollaborator() async {
+    final token = await _storage.read(key: 'jwt_token');
+    if (token == null) throw Exception('No hay token');
+
+    final response = await http.get(
+      Uri.parse('${Constants.events}/as-collaborator'),
+      headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body)['data'];
+      return data.map((json) => EventModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Error al obtener eventos como colaborador');
     }
   }
 

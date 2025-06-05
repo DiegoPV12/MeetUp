@@ -7,12 +7,14 @@ class EventHeader extends StatelessWidget {
   final String imagePath;
   final String eventId;
   final String creatorId;
+  final bool isCollaborator;
 
   const EventHeader({
     super.key,
     required this.imagePath,
     required this.eventId,
     required this.creatorId,
+    required this.isCollaborator,
   });
 
   @override
@@ -36,10 +38,11 @@ class EventHeader extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const BackButtonStyled(),
-                CollaboratorsButtonStyled(
-                  eventId: eventId,
-                  creatorId: creatorId,
-                ),
+                if (!isCollaborator)
+                  CollaboratorsButtonStyled(
+                    eventId: eventId,
+                    creatorId: creatorId,
+                  ),
               ],
             ),
           ),

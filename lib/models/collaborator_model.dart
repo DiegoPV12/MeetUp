@@ -20,4 +20,8 @@ class CollaboratorModel {
 
   @override
   String toString() => 'Collaborator(id: $id, name: $name, email: $email)';
+
+  factory CollaboratorModel.empty() {
+    return CollaboratorModel(id: '', name: '', email: '');
+  }
 }

@@ -11,6 +11,9 @@ class TaskColumn extends StatefulWidget {
   final List<TaskModel> tasks;
   final ValueChanged<TaskModel> onAccept;
   final ValueChanged<TaskModel>? onEdit;
+  final bool canEdit;
+  final String currentUserId;
+  final String creatorId;
 
   const TaskColumn({
     super.key,
@@ -19,6 +22,9 @@ class TaskColumn extends StatefulWidget {
     required this.tasks,
     required this.onAccept,
     this.onEdit,
+    required this.canEdit,
+    required this.currentUserId,
+    required this.creatorId,
   });
 
   @override
@@ -73,11 +79,11 @@ class _TaskColumnState extends State<TaskColumn> {
                           itemBuilder:
                               (_, i) => TaskTile(
                                 task: widget.tasks[i],
-                                readOnly: false,
+                                readOnly: !widget.canEdit,
                                 onEdit:
-                                    widget.onEdit == null
-                                        ? null
-                                        : () => widget.onEdit!(widget.tasks[i]),
+                                    widget.canEdit && widget.onEdit != null
+                                        ? () => widget.onEdit!(widget.tasks[i])
+                                        : null,
                               ),
                         ),
                       ),
@@ -163,6 +169,7 @@ class _TaskColumnState extends State<TaskColumn> {
                       itemBuilder:
                           (_, i) => TaskTileDraggable(
                             task: widget.tasks[i],
+                            canEdit: widget.canEdit,
                             onEdit:
                                 widget.onEdit == null
                                     ? null

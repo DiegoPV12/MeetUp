@@ -8,11 +8,13 @@ import 'package:provider/provider.dart';
 class NextEventCard extends StatelessWidget {
   final EventModel event;
   final String imagePath;
+  final bool isCollaborator;
 
   const NextEventCard({
     super.key,
     required this.event,
     this.imagePath = 'assets/images/event_placeholder.png',
+    required this.isCollaborator,
   });
 
   @override
@@ -31,7 +33,7 @@ class NextEventCard extends StatelessWidget {
         final updated = await Navigator.pushNamed(
           context,
           '/event-detail',
-          arguments: event.id,
+          arguments: {'eventId': event.id, 'isCollaborator': isCollaborator},
         );
 
         if (updated == true && context.mounted) {

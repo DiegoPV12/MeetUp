@@ -58,7 +58,7 @@ class _EventBudgetViewState extends State<EventBudgetView>
     }
     await vm.updateEventBudget(widget.eventId, val);
     // Refrescar también los detalles del evento
-    context.read<EventDetailViewModel>().fetchEventDetail(widget.eventId);
+    context.read<EventDetailViewModel>().fetchEventDetail(widget.eventId, false);
     if (!mounted) return;
     setState(() {
       _budgetVal = val;

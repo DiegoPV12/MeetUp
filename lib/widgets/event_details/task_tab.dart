@@ -8,7 +8,8 @@ import '../../../viewmodels/task_viewmodel.dart';
 
 class TaskTab extends StatelessWidget {
   final String eventId;
-  const TaskTab(this.eventId, {super.key});
+  final String creatorId;
+  const TaskTab({required this.eventId, required this.creatorId, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +48,7 @@ class TaskTab extends StatelessWidget {
                       () => Navigator.pushNamed(
                         context,
                         '/event-tasks',
-                        arguments: eventId,
+                        arguments: {'eventId': eventId, 'creatorId': creatorId},
                       ),
                   child: const Text('Ver lista completa'),
                 ),

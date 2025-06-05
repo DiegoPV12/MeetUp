@@ -240,16 +240,16 @@ class _CollaboratorViewState extends State<CollaboratorView> {
           return Scaffold(
             appBar: AppBar(title: const Text('Colaboradores')),
             body:
-                vm.collaborators.isEmpty
+                vm.sortedCollaborators.isEmpty
                     ? const Center(child: Text('Sin colaboradores'))
                     : ListView.builder(
                       padding: const EdgeInsets.symmetric(
                         vertical: 8,
                         horizontal: 12,
                       ),
-                      itemCount: vm.collaborators.length,
+                      itemCount: vm.sortedCollaborators.length,
                       itemBuilder: (context, index) {
-                        final user = vm.collaborators[index];
+                        final user = vm.sortedCollaborators[index];
                         // Dismissible para swipe-to-delete:
                         return Dismissible(
                           key: ValueKey(user.id),
@@ -386,7 +386,7 @@ class _CollaboratorViewState extends State<CollaboratorView> {
                                         ).showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              'Error al eliminar: $e',
+                                              'No se pueden eliminar colaboradores con tareas asignadas.',
                                             ),
                                           ),
                                         );

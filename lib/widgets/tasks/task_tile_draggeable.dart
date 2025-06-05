@@ -7,8 +7,14 @@ import 'package:meetup/widgets/tasks/task_tile.dart';
 class TaskTileDraggable extends StatelessWidget {
   final TaskModel task;
   final VoidCallback? onEdit; // ← NUEVO
+  final bool canEdit;
 
-  const TaskTileDraggable({super.key, required this.task, this.onEdit});
+  const TaskTileDraggable({
+    super.key,
+    required this.task,
+    this.onEdit,
+    required this.canEdit,
+  });
 
   static const _delay = Duration(
     milliseconds:
@@ -34,6 +40,7 @@ class TaskTileDraggable extends StatelessWidget {
       child: TaskTile(
         task: task,
         onEdit: onEdit, // ← mantiene el icono
+        readOnly: !canEdit,
       ),
     );
   }

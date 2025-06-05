@@ -123,4 +123,20 @@ class TaskService {
       throw Exception('No se pudo asignar la tarea');
     }
   }
+
+  Future<void> unassignTask(String taskId) async {
+    final token = await _getToken();
+    final res = await http.patch(
+      Uri.parse('${Constants.tasks}/$taskId/unassign'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    debugPrint('Desasignar tarea: ${res.statusCode} ${res.body}');
+    if (res.statusCode != 200) {
+      throw Exception('No se pudo desasignar la tarea');
+    }
+  }
 }

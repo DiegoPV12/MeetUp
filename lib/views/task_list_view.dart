@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meetup/viewmodels/user_viewmodel.dart';
 import 'package:meetup/widgets/tasks/task_columns.dart';
 import 'package:provider/provider.dart';
 
@@ -14,13 +15,30 @@ const _greenPastel = Color(0xFFC8E6C9); // COMPLETADO
 
 class TaskBoardView extends StatefulWidget {
   final String eventId;
-  const TaskBoardView({super.key, required this.eventId});
+  final String creatorId;
+  const TaskBoardView({
+    super.key,
+    required this.eventId,
+    required this.creatorId,
+  });
 
   @override
   State<TaskBoardView> createState() => _TaskBoardViewState();
 }
 
 class _TaskBoardViewState extends State<TaskBoardView> {
+  @override
+  void initState() {
+    super.initState();
+    // Asegurarnos de que el UserViewModel lea el perfil apenas se monte este widget
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userVm = Provider.of<UserViewModel>(context, listen: false);
+      if (!userVm.isLoading && userVm.user == null) {
+        userVm.loadUserProfile();
+      }
+    });
+  }
+
   /* ─────────── hoja modal NUEVA / EDITAR ─────────── */
   void _openTaskSheet(
     BuildContext context,
@@ -30,7 +48,7 @@ class _TaskBoardViewState extends State<TaskBoardView> {
     final isEdit = task != null;
     final tCtrl = TextEditingController(text: task?.title);
     final dCtrl = TextEditingController(text: task?.description);
-    String? selectedUserId = task?.assignedUserId; // ← clave aquí
+    String? selectedUserId = task?.assignedUserId;
 
     showModalBottomSheet(
       context: context,
@@ -73,19 +91,23 @@ class _TaskBoardViewState extends State<TaskBoardView> {
                       labelText: 'Asignar a',
                       prefixIcon: Icon(Icons.person),
                     ),
-                    value: selectedUserId, // ← reflejamos el valor actual
-                    items:
-                        vm.collaborators.map((c) {
-                          return DropdownMenuItem<String>(
-                            value: c.id,
-                            child: Text('${c.name} (${c.email})'),
-                          );
-                        }).toList(),
+                    value: selectedUserId,
+                    items: [
+                      const DropdownMenuItem<String>(
+                        value: null,
+                        child: Text('Sin asignar'),
+                      ),
+                      ...vm.collaborators.map((c) {
+                        return DropdownMenuItem<String>(
+                          value: c.id,
+                          child: Text('${c.name} (${c.email})'),
+                        );
+                      }).toList(),
+                    ],
                     onChanged: (value) {
                       selectedUserId = value;
                     },
                     isExpanded: true,
-                    hint: const Text('Sin asignar'),
                   ),
 
                   const SizedBox(height: Spacing.spacingLarge),
@@ -113,16 +135,22 @@ class _TaskBoardViewState extends State<TaskBoardView> {
                               desc,
                               widget.eventId,
                             );
-                            if (selectedUserId != null &&
-                                selectedUserId != task.assignedUserId) {
-                              await vm.assignTask(
-                                task.id,
-                                selectedUserId!,
-                                widget.eventId,
-                              );
+
+                            // Comparar y decidir si asignar o desasignar
+                            if (selectedUserId != task.assignedUserId) {
+                              if (selectedUserId == null) {
+                                await vm.unassignTask(task.id, widget.eventId);
+                              } else {
+                                await vm.assignTask(
+                                  task.id,
+                                  selectedUserId!,
+                                  widget.eventId,
+                                );
+                              }
                             }
                           } else {
                             await vm.addTask(widget.eventId, title, desc);
+
                             if (selectedUserId != null) {
                               final createdTask = vm.tasks.lastWhere(
                                 (t) =>
@@ -135,7 +163,6 @@ class _TaskBoardViewState extends State<TaskBoardView> {
                               );
                             }
                           }
-                          if (mounted) Navigator.pop(ctx);
                         } catch (_) {
                           ScaffoldMessenger.of(ctx).showSnackBar(
                             SnackBar(
@@ -185,8 +212,28 @@ class _TaskBoardViewState extends State<TaskBoardView> {
   /* ────────────────────────── build ────────────────────────── */
   @override
   Widget build(BuildContext context) {
+    final userVm = Provider.of<UserViewModel>(context);
+    final userId = userVm.user?.id;
+
+    if (userVm.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (userId == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text('No se pudo obtener la información del usuario'),
+        ),
+      );
+    }
+
     return ChangeNotifierProvider(
-      create: (_) => TaskViewModel()..loadTasks(widget.eventId),
+      create: (_) {
+        final vm = TaskViewModel();
+        vm.setCurrentUser(userId);
+        vm.loadTasks(widget.eventId);
+        return vm;
+      },
       child: Consumer<TaskViewModel>(
         builder: (ctx, vm, _) {
           /* separar por estado */
@@ -241,10 +288,28 @@ class _TaskBoardViewState extends State<TaskBoardView> {
                 bg: bg,
                 tasks: tasks,
                 onAccept: (task) {
-                  vm.moveTaskOptimistic(task, status);
-                  vm.setTaskStatus(task.id, status);
+                  final isAssignedUser = task.assignedUserId == userId;
+                  final isUnassignedAndCreator =
+                      task.assignedUserId == null && userId == widget.creatorId;
+
+                  if (isAssignedUser || isUnassignedAndCreator) {
+                    vm.moveTaskOptimistic(task, status);
+                    vm.setTaskStatus(task.id, status);
+                  } else {
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Solo el usuario asignado puede mover su tarea.',
+                        ),
+                      ),
+                    );
+                  }
                 },
+
                 onEdit: (task) => _openTaskSheet(ctx, vm, task: task),
+                canEdit: userId == widget.creatorId,
+                currentUserId: userId,
+                creatorId: widget.creatorId,
               ),
             );
           }
@@ -254,10 +319,11 @@ class _TaskBoardViewState extends State<TaskBoardView> {
             appBar: AppBar(
               title: const SectionTitle('Checklist del evento'),
               actions: [
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () => _openTaskSheet(ctx, vm),
-                ),
+                if (userId == widget.creatorId)
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () => _openTaskSheet(ctx, vm),
+                  ),
               ],
             ),
             body:
@@ -282,7 +348,7 @@ class _TaskBoardViewState extends State<TaskBoardView> {
                             bg: _greenPastel,
                             tasks: done,
                           ),
-                          trash(),
+                          if (userId == widget.creatorId) trash(),
                         ],
                       ),
                     ),

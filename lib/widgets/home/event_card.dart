@@ -11,6 +11,7 @@ class EventCard extends StatelessWidget {
   final String imagePath;
   final double? width; //
   final double? height; //
+  final bool isCollaborator;
 
   const EventCard({
     super.key,
@@ -18,6 +19,7 @@ class EventCard extends StatelessWidget {
     this.imagePath = 'assets/images/4.png',
     this.width,
     this.height,
+    required this.isCollaborator,
   });
 
   @override
@@ -37,7 +39,7 @@ class EventCard extends StatelessWidget {
         final updated = await Navigator.pushNamed(
           context,
           '/event-detail',
-          arguments: event.id,
+          arguments: {'eventId': event.id, 'isCollaborator': isCollaborator},
         );
 
         if (updated == true && context.mounted) {
@@ -106,6 +108,37 @@ class EventCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (isCollaborator)
+                  Positioned(
+                    top: Spacing.spacingSmall,
+                    right: Spacing.spacingSmall,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: cs.primaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: const [
+                          BoxShadow(
+                            blurRadius: 4,
+                            color: Colors.black26,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        '👥 Colaboras',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.labelMedium!.copyWith(
+                          color: cs.onPrimaryContainer,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
 

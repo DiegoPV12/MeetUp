@@ -12,6 +12,9 @@ class EventViewModel extends ChangeNotifier {
   List<EventModel> _events = [];
   List<EventModel> get events => _events;
 
+  List<EventModel> _collaboratorEvents = [];
+  List<EventModel> get collaboratorEvents => _collaboratorEvents;
+
   Future<void> createEvent({
     required String name,
     required String description,
@@ -51,6 +54,21 @@ class EventViewModel extends ChangeNotifier {
       _events = await _eventService.fetchEvents();
     } catch (e) {
       _events = [];
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchEventsAsCollaborator() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      _collaboratorEvents = await _eventService.fetchEventsAsCollaborator();
+    } catch (e) {
+      _collaboratorEvents = [];
       rethrow;
     } finally {
       _isLoading = false;

@@ -24,7 +24,9 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<EventViewModel>(context, listen: false).fetchEvents();
+      final vm = Provider.of<EventViewModel>(context, listen: false);
+      vm.fetchEvents();
+      vm.fetchEventsAsCollaborator();
     });
   }
 
@@ -49,6 +51,13 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     final evm = Provider.of<EventViewModel>(context);
+
+    final allEvents = [
+      ...evm.events.map((e) => (e, false)),
+      ...evm.collaboratorEvents
+          .where((c) => !evm.events.any((e) => e.id == c.id))
+          .map((c) => (c, true)),
+    ];
 
     return Scaffold(
       extendBody: true, // para que el BottomNavBar curve sobre el body
@@ -81,7 +90,7 @@ class _HomeViewState extends State<HomeView> {
 
               const SectionTitle('Próximos Eventos🎉'),
               const SizedBox(height: Spacing.spacingMedium),
-              EventSection(isLoading: evm.isLoading, events: evm.events),
+              EventSection(isLoading: evm.isLoading, eventsWithFlag: allEvents),
               const SizedBox(height: Spacing.spacingXLarge),
 
               ActionCard(

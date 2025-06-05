@@ -90,7 +90,7 @@ class BudgetTab extends StatelessWidget {
                       ),
                     ).then((dirty) {
                       if (dirty == true) {
-                        detailVm.fetchEventDetail(eventId);
+                        detailVm.fetchEventDetail(eventId, false);
                       }
                     });
                   },

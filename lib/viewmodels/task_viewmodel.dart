@@ -17,6 +17,13 @@ class TaskViewModel extends ChangeNotifier {
   List<CollaboratorModel> get collaborators => _collaborators;
   bool get isLoading => _isLoading;
 
+  String? _currentUserId;
+  String? get currentUserId => _currentUserId;
+
+  void setCurrentUser(String userId) {
+    _currentUserId = userId;
+  }
+
   /* ───────────────── cargar listado ───────────────── */
   Future<void> loadTasks(String eventId) async {
     _isLoading = true;
@@ -27,7 +34,9 @@ class TaskViewModel extends ChangeNotifier {
         _collabSvc.getEventCollaborators(eventId),
       ]);
       _tasks = results[0] as List<TaskModel>;
-      _collaborators = results[1] as List<CollaboratorModel>;
+      _collaborators =
+          (results[1] as List<CollaboratorModel>)
+            ..sort((a, b) => a.name.compareTo(b.name));
     } catch (e) {
       _tasks = [];
       _collaborators = [];
@@ -122,6 +131,11 @@ class TaskViewModel extends ChangeNotifier {
   // asignar task a usuario
   Future<void> assignTask(String taskId, String userId, String eventId) async {
     await _svc.assignTaskToUser(taskId, userId);
-    await loadTasks(eventId); // Recarga la lista para reflejar el cambio
+    //await loadTasks(eventId); // Recarga la lista para reflejar el cambio
+  }
+
+  Future<void> unassignTask(String taskId, String eventId) async {
+    await _svc.unassignTask(taskId);
+    //await loadTasks(eventId); // recarga para reflejar el cambio
   }
 }

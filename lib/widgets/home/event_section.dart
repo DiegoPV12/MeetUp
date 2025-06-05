@@ -6,10 +6,10 @@ import 'package:meetup/theme/theme.dart';
 
 class EventSection extends StatelessWidget {
   final bool isLoading;
-  final List<EventModel> events;
+  final List<(EventModel, bool)> eventsWithFlag;
   const EventSection({
     required this.isLoading,
-    required this.events,
+    required this.eventsWithFlag,
     super.key,
   });
 
@@ -22,7 +22,7 @@ class EventSection extends StatelessWidget {
       );
     }
 
-    if (events.isEmpty) {
+    if (eventsWithFlag.isEmpty) {
       return DashedBorder(
         radius: 12,
         color: Theme.of(context).colorScheme.onTertiaryContainer,
@@ -52,13 +52,18 @@ class EventSection extends StatelessWidget {
         controller: PageController(viewportFraction: 0.8),
         physics: const BouncingScrollPhysics(),
         padEnds: false,
-        itemCount: events.length,
+        itemCount: eventsWithFlag.length,
         itemBuilder: (ctx, i) {
+          final (event, isCollaborator) = eventsWithFlag[i];
           return Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: Spacing.spacingMedium,
             ),
-            child: EventCard(event: events[i], height: 140),
+            child: EventCard(
+              event: event,
+              height: 140,
+              isCollaborator: isCollaborator,
+            ),
           );
         },
       ),

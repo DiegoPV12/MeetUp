@@ -11,12 +11,12 @@ class EventDetailViewModel extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  Future<void> fetchEventDetail(String eventId) async {
+  Future<void> fetchEventDetail(String eventId, bool isCollaborator) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      _event = await _eventService.fetchEventById(eventId);
+      _event = await _eventService.fetchEventById(eventId, isCollaborator);
     } catch (e) {
       rethrow;
     } finally {

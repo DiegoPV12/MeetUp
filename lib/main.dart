@@ -71,9 +71,11 @@ class MeetUpApp extends StatelessWidget {
           '/create-from-template': (context) => const CreateFromTemplateView(),
           '/events': (context) => const ListEventsView(),
           '/event-detail': (context) {
-            final eventId =
-                ModalRoute.of(context)!.settings.arguments as String;
-            return EventDetailView(eventId: eventId);
+            final args = ModalRoute.of(context)!.settings.arguments as Map;
+            return EventDetailView(
+              eventId: args['eventId'],
+              isCollaborator: args['isCollaborator'],
+            );
           },
           '/edit-event': (context) {
             final eventId =
@@ -81,9 +83,11 @@ class MeetUpApp extends StatelessWidget {
             return EditEventView(eventId: eventId);
           },
           '/event-tasks': (context) {
-            final eventId =
-                ModalRoute.of(context)!.settings.arguments as String;
-            return TaskBoardView(eventId: eventId);
+            final args = ModalRoute.of(context)!.settings.arguments as Map;
+            return TaskBoardView(
+              eventId: args['eventId'],
+              creatorId: args['creatorId'],
+            );
           },
           '/budget': (context) {
             final args =

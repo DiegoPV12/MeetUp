@@ -56,6 +56,26 @@ class _AppDrawerWidgetState extends State<AppDrawerWidget> {
               child: Icon(Icons.person, size: 40),
             ),
           ),
+
+          // Sección principal
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.event),
+                  title: const Text('Lista de eventos'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/events');
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          // Espacio y botón anclado abajo
+          const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('Cerrar sesión'),
@@ -64,7 +84,6 @@ class _AppDrawerWidgetState extends State<AppDrawerWidget> {
 
               final shouldLogout = await _showLogoutConfirmation(rootContext);
               if (shouldLogout) {
-                Navigator.of(context).pop();
                 await Future.delayed(const Duration(milliseconds: 300));
                 await authViewModel.logout();
                 Navigator.pushNamedAndRemoveUntil(
@@ -73,14 +92,6 @@ class _AppDrawerWidgetState extends State<AppDrawerWidget> {
                   (route) => false,
                 );
               }
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.event),
-            title: const Text('Lista de eventos'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/events');
             },
           ),
         ],

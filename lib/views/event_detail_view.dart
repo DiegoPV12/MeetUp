@@ -15,7 +15,12 @@ import '../widgets/event_details/task_tab.dart';
 
 class EventDetailView extends StatelessWidget {
   final String eventId;
-  const EventDetailView({super.key, required this.eventId});
+  final bool isCollaborator;
+  const EventDetailView({
+    super.key,
+    required this.eventId,
+    required this.isCollaborator,
+  });
 
   Future<bool> _showConfirmationDialog(
     BuildContext context,
@@ -62,7 +67,9 @@ class EventDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<EventDetailViewModel>(
-      create: (_) => EventDetailViewModel()..fetchEventDetail(eventId),
+      create:
+          (_) =>
+              EventDetailViewModel()..fetchEventDetail(eventId, isCollaborator),
       child: Scaffold(
         body: Consumer<EventDetailViewModel>(
           builder: (ctx, vm, _) {
@@ -87,7 +94,7 @@ class EventDetailView extends StatelessWidget {
                     : 'assets/images/4.png';
 
             return DefaultTabController(
-              length: 5, // ← ahora son 4 pestañas
+              length: isCollaborator ? 2 : 5, // ← ahora son 4 pestañas
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -95,6 +102,7 @@ class EventDetailView extends StatelessWidget {
                     imagePath: imagePath,
                     eventId: eventId,
                     creatorId: creatorId,
+                    isCollaborator: isCollaborator
                   ),
                   const SizedBox(height: Spacing.spacingMedium),
                   Padding(
@@ -135,18 +143,21 @@ class EventDetailView extends StatelessWidget {
                       0,
                     ),
                     child: AppTabBar(
-                      tabs: const [
+                      tabs: [
                         Tab(icon: Icon(Icons.info_outline), text: 'General'),
-                        Tab(icon: Icon(Icons.people_outline), text: 'RSVP'),
+                        if (!isCollaborator)
+                          Tab(icon: Icon(Icons.people_outline), text: 'RSVP'),
                         Tab(
                           icon: Icon(Icons.checklist_outlined),
                           text: 'Tareas',
                         ),
-                        Tab(
-                          icon: Icon(Icons.account_balance_wallet_outlined),
-                          text: 'Presupuesto',
-                        ),
-                        Tab(icon: Icon(Icons.schedule), text: 'Cronograma'),
+                        if (!isCollaborator)
+                          Tab(
+                            icon: Icon(Icons.account_balance_wallet_outlined),
+                            text: 'Presupuesto',
+                          ),
+                        if (!isCollaborator)
+                          Tab(icon: Icon(Icons.schedule), text: 'Cronograma'),
                       ],
                     ),
                   ),
@@ -159,10 +170,11 @@ class EventDetailView extends StatelessWidget {
                           endTime: e.endTime,
                           location: e.location,
                         ),
-                        RsvpTab(eventId: eventId),
-                        TaskTab(e.id),
-                        BudgetTab(eventId: e.id, eventStartDate: e.startTime),
-                        ScheduleTab(e.id),
+                        if (!isCollaborator) RsvpTab(eventId: eventId),
+                        TaskTab(eventId: e.id, creatorId: e.createdBy),
+                        if (!isCollaborator)
+                          BudgetTab(eventId: e.id, eventStartDate: e.startTime),
+                        if (!isCollaborator) ScheduleTab(e.id),
                       ],
                     ),
                   ),
@@ -171,66 +183,72 @@ class EventDetailView extends StatelessWidget {
             );
           },
         ),
-        floatingActionButton: Consumer<EventDetailViewModel>(
-          builder: (ctx, vm, _) {
-            if (vm.event == null) return const SizedBox.shrink();
-            final e = vm.event!;
-            final cancelled = e.isCancelled ?? false;
+        floatingActionButton:
+            isCollaborator
+                ? null
+                : Consumer<EventDetailViewModel>(
+                  builder: (ctx, vm, _) {
+                    if (vm.event == null) return const SizedBox.shrink();
+                    final e = vm.event!;
+                    final cancelled = e.isCancelled ?? false;
 
-            return SpeedDial(
-              icon: Icons.menu,
-              activeIcon: Icons.close,
-              backgroundColor: Theme.of(ctx).colorScheme.primary,
-              foregroundColor: Theme.of(ctx).colorScheme.onPrimary,
-              children: [
-                SpeedDialChild(
-                  child: const Icon(Icons.edit),
-                  label: 'Editar',
-                  onTap: () async {
-                    final updated = await Navigator.pushNamed(
-                      ctx,
-                      '/edit-event',
-                      arguments: e.id,
+                    return SpeedDial(
+                      icon: Icons.menu,
+                      activeIcon: Icons.close,
+                      backgroundColor: Theme.of(ctx).colorScheme.primary,
+                      foregroundColor: Theme.of(ctx).colorScheme.onPrimary,
+                      children: [
+                        SpeedDialChild(
+                          child: const Icon(Icons.edit),
+                          label: 'Editar',
+                          onTap: () async {
+                            final updated = await Navigator.pushNamed(
+                              ctx,
+                              '/edit-event',
+                              arguments: e.id,
+                            );
+                            if (updated == true)
+                              vm.fetchEventDetail(e.id, isCollaborator);
+                          },
+                        ),
+                        SpeedDialChild(
+                          child: Icon(
+                            cancelled ? Icons.undo : Icons.cancel_outlined,
+                          ),
+                          label: cancelled ? 'Reactivar' : 'Cancelar',
+                          onTap: () async {
+                            final ok = await _showConfirmationDialog(
+                              ctx,
+                              cancelled
+                                  ? '¿Reactivar este evento?'
+                                  : '¿Cancelar este evento?',
+                            );
+                            if (ok) {
+                              await vm.toggleCancelEvent(
+                                e.id,
+                                isCurrentlyCancelled: cancelled,
+                              );
+                            }
+                          },
+                        ),
+                        SpeedDialChild(
+                          child: const Icon(Icons.delete),
+                          label: 'Eliminar',
+                          onTap: () async {
+                            final ok = await _showConfirmationDialog(
+                              ctx,
+                              '¿Eliminar este evento? Esta acción no se puede deshacer.',
+                            );
+                            if (ok) {
+                              await vm.deleteEvent(e.id);
+                              Navigator.pop(ctx, true);
+                            }
+                          },
+                        ),
+                      ],
                     );
-                    if (updated == true) vm.fetchEventDetail(e.id);
                   },
                 ),
-                SpeedDialChild(
-                  child: Icon(cancelled ? Icons.undo : Icons.cancel_outlined),
-                  label: cancelled ? 'Reactivar' : 'Cancelar',
-                  onTap: () async {
-                    final ok = await _showConfirmationDialog(
-                      ctx,
-                      cancelled
-                          ? '¿Reactivar este evento?'
-                          : '¿Cancelar este evento?',
-                    );
-                    if (ok) {
-                      await vm.toggleCancelEvent(
-                        e.id,
-                        isCurrentlyCancelled: cancelled,
-                      );
-                    }
-                  },
-                ),
-                SpeedDialChild(
-                  child: const Icon(Icons.delete),
-                  label: 'Eliminar',
-                  onTap: () async {
-                    final ok = await _showConfirmationDialog(
-                      ctx,
-                      '¿Eliminar este evento? Esta acción no se puede deshacer.',
-                    );
-                    if (ok) {
-                      await vm.deleteEvent(e.id);
-                      Navigator.pop(ctx, true);
-                    }
-                  },
-                ),
-              ],
-            );
-          },
-        ),
       ),
     );
   }

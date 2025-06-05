@@ -16,7 +16,7 @@ class EditEventViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _event = await _eventService.fetchEventById(eventId);
+      _event = await _eventService.fetchEventById(eventId, false);
     } catch (e) {
       rethrow;
     } finally {
@@ -34,7 +34,7 @@ class EditEventViewModel extends ChangeNotifier {
 
     try {
       await _eventService.updateEvent(eventId, updatedData);
-      _event = await _eventService.fetchEventById(eventId);
+      _event = await _eventService.fetchEventById(eventId, false);
     } catch (e) {
       rethrow;
     } finally {

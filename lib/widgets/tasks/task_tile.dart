@@ -15,7 +15,7 @@ class TaskTile extends StatelessWidget {
     super.key,
     required this.task,
     this.onEdit,
-    this.readOnly = false,
+    required this.readOnly,
   });
 
   // ---------- helpers visuales ----------
@@ -76,7 +76,7 @@ class TaskTile extends StatelessWidget {
                   const SizedBox(height: Spacing.spacingXSmall),
                 ],
 
-                // 👤 Mostrar colaborador asignado si existe
+                // Mostrar colaborador asignado si existe
                 if (task.assignedUserName != null)
                   Row(
                     children: [
@@ -94,7 +94,7 @@ class TaskTile extends StatelessWidget {
               ],
             ),
           ),
-          if (!readOnly && onEdit != null)
+          if (!readOnly)
             IconButton(
               icon: const Icon(Icons.edit),
               tooltip: 'Editar',

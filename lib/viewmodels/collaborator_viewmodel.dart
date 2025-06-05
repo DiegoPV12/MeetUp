@@ -11,6 +11,12 @@ class CollaboratorViewModel extends ChangeNotifier {
   List<CollaboratorModel> _collaborators = [];
   List<CollaboratorModel> get collaborators => _collaborators;
 
+  List<CollaboratorModel> get sortedCollaborators {
+    final sorted = [..._collaborators]; // copia defensiva
+    sorted.sort((a, b) => a.name.compareTo(b.name));
+    return sorted;
+  }
+
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -35,7 +41,6 @@ class CollaboratorViewModel extends ChangeNotifier {
     } catch (e) {
       _allUsers = [];
       _collaborators = [];
-      // en caso de error, dejamos las listas vacías
     }
 
     _isLoading = false;
@@ -45,11 +50,15 @@ class CollaboratorViewModel extends ChangeNotifier {
   /// Devuelve la lista de usuarios que no están todavía como colaboradores
   /// y excluye al usuario creador.
   List<CollaboratorModel> get availableUsers {
-    return _allUsers.where((u) {
-      final already = _collaborators.any((c) => c.id == u.id);
-      final isCreator = u.id == _creatorId;
-      return !already && !isCreator;
-    }).toList();
+    final filtered =
+        _allUsers.where((u) {
+          final already = _collaborators.any((c) => c.id == u.id);
+          final isCreator = u.id == _creatorId;
+          return !already && !isCreator;
+        }).toList();
+
+    filtered.sort((a, b) => a.name.compareTo(b.name));
+    return filtered;
   }
 
   /// Agrega un colaborador al evento:
