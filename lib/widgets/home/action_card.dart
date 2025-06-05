@@ -34,7 +34,7 @@ class ActionCard extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     final bg = backgroundColor ?? cs.primaryContainer;
 
-    const cardHeight = 180.0;
+    const cardHeight = 230.0;
     const imageOffset = 40.0;
 
     return Container(
@@ -60,7 +60,7 @@ class ActionCard extends StatelessWidget {
                       children: [
                         Text(title, style: tt.headlineMedium),
                         const SizedBox(height: Spacing.spacingSmall),
-                        Text(subtitle, style: tt.bodyMedium),
+                        Text(subtitle, style: tt.bodyLarge),
                         const Spacer(),
                         // Botón con estilo personalizable
                         SizedBox(
@@ -75,6 +75,7 @@ class ActionCard extends StatelessWidget {
                             child: Text(buttonLabel),
                           ),
                         ),
+                        SizedBox(height: 30),
                       ],
                     ),
                   ),
@@ -88,7 +89,7 @@ class ActionCard extends StatelessWidget {
           // Imagen en posición flotante
           Positioned(
             right: Spacing.spacingMedium - imageOffset + 25,
-            top: (cardHeight - 120) / 1.5,
+            top: (cardHeight - 140) / 1.5,
             child: Image.asset(
               imagePath,
               width: 150,

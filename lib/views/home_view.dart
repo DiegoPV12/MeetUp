@@ -1,7 +1,6 @@
 // lib/views/home_view.dart
 import 'package:flutter/material.dart';
 import 'package:meetup/widgets/shared/app_drawer_widget.dart';
-import 'package:meetup/widgets/shared/bottom_navbar.dart';
 import 'package:meetup/widgets/home/searchbar.dart';
 import 'package:meetup/widgets/home/section_title.dart';
 import 'package:meetup/widgets/home/event_section.dart';
@@ -18,8 +17,6 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  int _navIndex = 0;
-
   @override
   void initState() {
     super.initState();
@@ -28,23 +25,6 @@ class _HomeViewState extends State<HomeView> {
       vm.fetchEvents();
       vm.fetchEventsAsCollaborator();
     });
-  }
-
-  void _handleNavTap(int index) {
-    setState(() => _navIndex = index);
-    switch (index) {
-      case 0:
-        // Ya estamos en Home
-        break;
-      case 1:
-        break;
-      case 2:
-        break;
-      case 3:
-        // TODO: ruta de notificaciones
-        // Navigator.pushNamed(context, '/notifications');
-        break;
-    }
   }
 
   @override
@@ -60,7 +40,7 @@ class _HomeViewState extends State<HomeView> {
     ];
 
     return Scaffold(
-      extendBody: true, // para que el BottomNavBar curve sobre el body
+      extendBody: true,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text('MeetUp', style: tt.headlineMedium),
@@ -92,6 +72,7 @@ class _HomeViewState extends State<HomeView> {
               const SizedBox(height: Spacing.spacingMedium),
               EventSection(isLoading: evm.isLoading, eventsWithFlag: allEvents),
               const SizedBox(height: Spacing.spacingXLarge),
+              const SizedBox(height: Spacing.spacingMedium),
 
               ActionCard(
                 title: 'Crea un Evento!',
@@ -107,10 +88,6 @@ class _HomeViewState extends State<HomeView> {
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _navIndex,
-        onTap: _handleNavTap,
       ),
     );
   }
