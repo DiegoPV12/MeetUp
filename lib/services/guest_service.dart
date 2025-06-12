@@ -50,7 +50,6 @@ class GuestService {
         'status': guest.status,
       }),
     );
-    print(res.body);
     if (res.statusCode != 200) {
       throw Exception('Error al actualizar invitado');
     }

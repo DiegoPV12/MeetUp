@@ -207,8 +207,9 @@ class EventDetailView extends StatelessWidget {
                               '/edit-event',
                               arguments: e.id,
                             );
-                            if (updated == true)
+                            if (updated == true) {
                               vm.fetchEventDetail(e.id, isCollaborator);
+                            }
                           },
                         ),
                         SpeedDialChild(

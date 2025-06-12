@@ -21,8 +21,6 @@ class ActivityService {
       },
     );
 
-    print('Response status: ${res.statusCode}');
-    print('Response body: ${res.body}');
 
     if (res.statusCode != 200) {
       throw Exception('Error al cargar actividades');

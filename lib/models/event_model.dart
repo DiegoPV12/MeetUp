@@ -28,7 +28,6 @@ class EventModel {
   });
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
-    print('Recibiendo json del evento: $json');
 
     double? parsedBudget;
     try {

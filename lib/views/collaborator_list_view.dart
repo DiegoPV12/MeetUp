@@ -171,8 +171,9 @@ class _CollaboratorViewState extends State<CollaboratorView> {
                                           onPressed: () async {
                                             try {
                                               await vm.addCollaborator(user);
-                                              if (context.mounted)
+                                              if (context.mounted) {
                                                 Navigator.pop(context);
+                                              }
                                             } catch (e) {
                                               if (context.mounted) {
                                                 ScaffoldMessenger.of(
