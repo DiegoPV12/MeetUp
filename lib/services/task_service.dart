@@ -1,29 +1,12 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/task_model.dart';
-import '../utils/constants.dart';
+import 'showcase_data.dart';
 
 class TaskService {
-  final _storage = const FlutterSecureStorage();
-
-  Future<String?> _getToken() => _storage.read(key: 'jwt_token');
-
   Future<List<TaskModel>> getTasksByEvent(String eventId) async {
-    final token = await _getToken();
-    final res = await http.get(
-      Uri.parse('${Constants.tasks}/event/$eventId'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-    debugPrint(res.body);
-    if (res.statusCode == 200) {
-      final decoded = jsonDecode(res.body);
-      final data = decoded['data'] as List;
-      return data.map((json) => TaskModel.fromJson(json)).toList();
-    } else {
-      throw Exception('Error al obtener tareas');
-    }
+    return ShowcaseData.tasks
+        .where((task) => task.eventId == eventId)
+        .toList();
   }
 
   Future<void> createTask(
@@ -31,112 +14,84 @@ class TaskService {
     String title,
     String description,
   ) async {
-    final token = await _getToken();
-    final body = jsonEncode({
-      'event': eventId,
-      'title': title,
-      'description': description,
-    });
-    final res = await http.post(
-      Uri.parse(Constants.tasks),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: body,
+    final event = ShowcaseData.findEvent(eventId);
+    ShowcaseData.tasks.add(
+      TaskModel(
+        id: ShowcaseData.nextTaskId(),
+        title: title,
+        description: description,
+        status: 'pending',
+        eventId: eventId,
+        eventName: event?.name ?? 'Evento',
+      ),
     );
-    debugPrint(body);
-    debugPrint(res.body);
-    final decoded = jsonDecode(res.body);
-    if (res.statusCode != 200 && res.statusCode != 201 ||
-        decoded['success'] != true) {
-      debugPrint('Error body: ${res.body}');
-      throw Exception('Error al crear tarea');
-    }
   }
 
   Future<void> updateTaskStatus(String taskId, String status) async {
-    final token = await _getToken();
-    final body = jsonEncode({'status': status});
-    final res = await http.patch(
-      Uri.parse('${Constants.tasks}/$taskId/status'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: body,
-    );
-    debugPrint(token);
-    debugPrint('Request body: $body');
-    debugPrint('Response status: ${res.statusCode}');
-    debugPrint('Response body: ${res.body}');
-
-    if (res.statusCode != 200) {
-      throw Exception('Error al actualizar estado');
-    }
+    final index =
+        ShowcaseData.tasks.indexWhere((task) => task.id == taskId);
+    if (index == -1) return;
+    ShowcaseData.tasks[index] =
+        ShowcaseData.tasks[index].copyWith(status: status);
   }
 
   Future<void> deleteTask(String taskId) async {
-    final token = await _getToken();
-    final res = await http.delete(
-      Uri.parse('${Constants.tasks}/$taskId'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-
-    if (res.statusCode != 200 && res.statusCode != 204) {
-      throw Exception('Error al eliminar tarea');
-    }
+    ShowcaseData.tasks.removeWhere((task) => task.id == taskId);
   }
 
   Future<void> editTask(String taskId, String title, String description) async {
-    final token = await _getToken();
-    final body = jsonEncode({'title': title, 'description': description});
-
-    final res = await http.put(
-      Uri.parse('${Constants.tasks}/$taskId'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: body,
+    final index =
+        ShowcaseData.tasks.indexWhere((task) => task.id == taskId);
+    if (index == -1) return;
+    final existing = ShowcaseData.tasks[index];
+    ShowcaseData.tasks[index] = TaskModel(
+      id: existing.id,
+      title: title,
+      description: description,
+      status: existing.status,
+      eventId: existing.eventId,
+      eventName: existing.eventName,
+      assignedUserId: existing.assignedUserId,
+      assignedUserName: existing.assignedUserName,
+      assignedUserEmail: existing.assignedUserEmail,
     );
-
-    if (res.statusCode != 200) {
-      debugPrint('Error body: ${res.body}');
-      throw Exception('Error al editar tarea');
-    }
   }
 
   Future<void> assignTaskToUser(String taskId, String userId) async {
-    final token = await _getToken();
-    final res = await http.patch(
-      Uri.parse('${Constants.tasks}/$taskId/assign'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({'userId': userId}),
+    final index =
+        ShowcaseData.tasks.indexWhere((task) => task.id == taskId);
+    if (index == -1) return;
+    final user = ShowcaseData.collaborators
+        .firstWhere((collaborator) => collaborator.id == userId);
+    final existing = ShowcaseData.tasks[index];
+    ShowcaseData.tasks[index] = TaskModel(
+      id: existing.id,
+      title: existing.title,
+      description: existing.description,
+      status: existing.status,
+      eventId: existing.eventId,
+      eventName: existing.eventName,
+      assignedUserId: user.id,
+      assignedUserName: user.name,
+      assignedUserEmail: user.email,
     );
-
-    if (res.statusCode != 200) {
-      debugPrint('Error al asignar tarea: ${res.body}');
-      throw Exception('No se pudo asignar la tarea');
-    }
   }
 
   Future<void> unassignTask(String taskId) async {
-    final token = await _getToken();
-    final res = await http.patch(
-      Uri.parse('${Constants.tasks}/$taskId/unassign'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
+    final index =
+        ShowcaseData.tasks.indexWhere((task) => task.id == taskId);
+    if (index == -1) return;
+    final existing = ShowcaseData.tasks[index];
+    ShowcaseData.tasks[index] = TaskModel(
+      id: existing.id,
+      title: existing.title,
+      description: existing.description,
+      status: existing.status,
+      eventId: existing.eventId,
+      eventName: existing.eventName,
+      assignedUserId: null,
+      assignedUserName: null,
+      assignedUserEmail: null,
     );
-
-    debugPrint('Desasignar tarea: ${res.statusCode} ${res.body}');
-    if (res.statusCode != 200) {
-      throw Exception('No se pudo desasignar la tarea');
-    }
   }
 }

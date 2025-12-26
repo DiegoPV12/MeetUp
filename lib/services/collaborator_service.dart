@@ -1,76 +1,62 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:meetup/models/collaborator_model.dart';
-import 'package:meetup/utils/constants.dart';
+import '../models/event_model.dart';
+import 'showcase_data.dart';
 
 class CollaboratorService {
-  final _storage = const FlutterSecureStorage();
-
-  Future<String?> _getToken() => _storage.read(key: 'jwt_token');
-
   Future<List<CollaboratorModel>> getAllUsers() async {
-    final token = await _getToken();
-    final res = await http.get(
-      Uri.parse(Constants.users),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-
-    if (res.statusCode != 200) {
-      throw Exception('Error al obtener la lista de usuarios');
-    }
-
-    final data = jsonDecode(res.body)['data'] as List<dynamic>;
-    return data.map((e) => CollaboratorModel.fromJson(e)).toList();
+    return ShowcaseData.collaborators;
   }
 
   Future<List<CollaboratorModel>> getEventCollaborators(String eventId) async {
-    final token = await _getToken();
-    final res = await http.get(
-      Uri.parse('${Constants.events}/$eventId/collaborators'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-    if (res.statusCode != 200) {
-      throw Exception('Error al obtener colaboradores del evento');
-    }
+    final event = ShowcaseData.findEvent(eventId);
+    if (event == null) return [];
 
-    final data = jsonDecode(res.body)['data'] as List<dynamic>;
-    return data.map((e) => CollaboratorModel.fromJson(e)).toList();
+    return ShowcaseData.collaborators
+        .where((user) => event.collaborators.contains(user.id))
+        .toList();
   }
 
   Future<void> addCollaborator(String eventId, String userId) async {
-    final token = await _getToken();
-    final res = await http.patch(
-      Uri.parse('${Constants.events}/$eventId/collaborators/add'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({'collaboratorId': userId}),
+    final index = ShowcaseData.findEventIndex(eventId);
+    if (index == -1) return;
+
+    final event = ShowcaseData.events[index];
+    if (event.collaborators.contains(userId)) return;
+    ShowcaseData.events[index] = EventModel(
+      id: event.id,
+      name: event.name,
+      description: event.description,
+      location: event.location,
+      category: event.category,
+      startTime: event.startTime,
+      endTime: event.endTime,
+      imageUrl: event.imageUrl,
+      createdBy: event.createdBy,
+      isCancelled: event.isCancelled,
+      budget: event.budget,
+      collaborators: [...event.collaborators, userId],
     );
-    if (res.statusCode != 200) {
-      throw Exception('Error al agregar colaborador');
-    }
   }
 
   Future<void> removeCollaborator(String eventId, String userId) async {
-    final token = await _getToken();
-    final res = await http.patch(
-      Uri.parse('${Constants.events}/$eventId/collaborators/remove'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({'collaboratorId': userId}),
+    final index = ShowcaseData.findEventIndex(eventId);
+    if (index == -1) return;
+
+    final event = ShowcaseData.events[index];
+    ShowcaseData.events[index] = EventModel(
+      id: event.id,
+      name: event.name,
+      description: event.description,
+      location: event.location,
+      category: event.category,
+      startTime: event.startTime,
+      endTime: event.endTime,
+      imageUrl: event.imageUrl,
+      createdBy: event.createdBy,
+      isCancelled: event.isCancelled,
+      budget: event.budget,
+      collaborators:
+          event.collaborators.where((id) => id != userId).toList(),
     );
-    if (res.statusCode != 200) {
-      throw Exception('Error al eliminar colaborador');
-    }
   }
 }
