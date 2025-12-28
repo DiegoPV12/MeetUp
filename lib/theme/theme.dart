@@ -1,3 +1,4 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 
 class FontSize {
@@ -7,88 +8,138 @@ class FontSize {
 }
 
 class AppTheme {
-  // Forzamos el primary exacto
   static const Color _seedColor = Color(0xFF6F2DBD);
-  static final ColorScheme _colorScheme = ColorScheme.fromSeed(
-    seedColor: _seedColor,
-    brightness: Brightness.light,
-  ).copyWith(primary: _seedColor);
+  static final TextTheme _baseTextTheme = Typography.material2021().black;
+  static final TextTheme _appTextTheme = _baseTextTheme
+      .apply(fontFamily: 'Noto Sans')
+      .copyWith(
+        displayLarge:
+            _baseTextTheme.displayLarge?.copyWith(fontFamily: 'Coolvetica'),
+        displayMedium:
+            _baseTextTheme.displayMedium?.copyWith(fontFamily: 'Coolvetica'),
+        displaySmall:
+            _baseTextTheme.displaySmall?.copyWith(fontFamily: 'Coolvetica'),
+        headlineLarge:
+            _baseTextTheme.headlineLarge?.copyWith(fontFamily: 'Coolvetica'),
+        headlineMedium:
+            _baseTextTheme.headlineMedium?.copyWith(fontFamily: 'Coolvetica'),
+        headlineSmall:
+            _baseTextTheme.headlineSmall?.copyWith(fontFamily: 'Coolvetica'),
+        titleLarge:
+            _baseTextTheme.titleLarge?.copyWith(fontFamily: 'Coolvetica'),
+        titleMedium:
+            _baseTextTheme.titleMedium?.copyWith(fontFamily: 'Coolvetica'),
+        titleSmall:
+            _baseTextTheme.titleSmall?.copyWith(fontFamily: 'Coolvetica'),
+      );
+
+  static InputDecorationTheme _inputDecorationTheme(ColorScheme colorScheme) =>
+      InputDecorationTheme(
+        filled: true,
+        fillColor: colorScheme.surfaceContainerHighest,
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+        iconColor: colorScheme.onSurfaceVariant,
+        prefixIconColor: colorScheme.onSurfaceVariant,
+        suffixIconColor: colorScheme.onSurfaceVariant,
+      );
 
   /// Light theme for the app
-  static final ThemeData lightTheme = ThemeData(
+  static final ThemeData lightTheme = FlexThemeData.light(
+    seedColor: _seedColor,
     useMaterial3: true,
-    colorScheme: _colorScheme,
-    fontFamily: 'Noto Sans',
-    textTheme: TextTheme(
-      headlineLarge: const TextStyle(fontFamily: 'Coolvetica', fontSize: 42),
-      headlineMedium: const TextStyle(fontFamily: 'Coolvetica'),
-      headlineSmall: const TextStyle(fontFamily: 'Coolvetica'),
-      titleLarge: const TextStyle(fontFamily: 'Coolvetica'),
-      titleMedium: const TextStyle(fontFamily: 'Coolvetica'),
-      titleSmall: const TextStyle(fontFamily: 'Coolvetica'),
-
-      // Cuerpos con Noto Sans y tamaños definidos
-      bodyLarge: const TextStyle(fontSize: FontSize.bodyLarge),
-      bodyMedium: const TextStyle(fontSize: FontSize.bodyMedium),
-      bodySmall: const TextStyle(fontSize: FontSize.bodySmall),
+    surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
+    blendLevel: 12,
+    subThemesData: const FlexSubThemesData(
+      filledButtonRadius: 12,
+      outlinedButtonRadius: 12,
+      inputDecoratorBorderType: FlexInputBorderType.none,
+      inputDecoratorRadius: 12,
     ),
-
-    // FilledButtons (primary actions)
+    textTheme: _appTextTheme,
+    fontFamily: 'Noto Sans',
+  ).copyWith(
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: _colorScheme.primary,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        minimumSize: const Size(0, 56), // altura fija
-        padding: const EdgeInsets.symmetric(vertical: 18),
+        minimumSize: const Size.fromHeight(56),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
         textStyle: const TextStyle(
           fontFamily: 'Noto Sans',
           fontSize: FontSize.bodyLarge,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
         ),
-        elevation: 0,
       ),
     ),
-
-    // OutlinedButtons (secondary actions)
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        side: BorderSide(color: _colorScheme.primary, width: 1.0),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        foregroundColor: _colorScheme.primary,
-        minimumSize: const Size(0, 56),
-        padding: const EdgeInsets.symmetric(vertical: 18),
+        minimumSize: const Size.fromHeight(56),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
         textStyle: const TextStyle(
           fontFamily: 'Noto Sans',
           fontSize: FontSize.bodyLarge,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
         ),
-        elevation: 0,
       ),
     ),
+    inputDecorationTheme: _inputDecorationTheme(
+      FlexThemeData.light(seedColor: _seedColor).colorScheme,
+    ),
+  );
 
-    // Input fields (OutlinedTextFields)
-    inputDecorationTheme: InputDecorationTheme(
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 20,
-        horizontal: 16,
-      ), // aumento vertical
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
+  /// Dark theme for the app
+  static final ThemeData darkTheme = FlexThemeData.dark(
+    seedColor: _seedColor,
+    useMaterial3: true,
+    surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
+    blendLevel: 16,
+    subThemesData: const FlexSubThemesData(
+      filledButtonRadius: 12,
+      outlinedButtonRadius: 12,
+      inputDecoratorBorderType: FlexInputBorderType.none,
+      inputDecoratorRadius: 12,
+    ),
+    textTheme: _appTextTheme,
+    fontFamily: 'Noto Sans',
+  ).copyWith(
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        minimumSize: const Size.fromHeight(56),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        textStyle: const TextStyle(
+          fontFamily: 'Noto Sans',
+          fontSize: FontSize.bodyLarge,
+          fontWeight: FontWeight.w600,
+        ),
       ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(56),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        textStyle: const TextStyle(
+          fontFamily: 'Noto Sans',
+          fontSize: FontSize.bodyLarge,
+          fontWeight: FontWeight.w600,
+        ),
       ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: _colorScheme.primary, width: 1.5),
-      ),
-      labelStyle: TextStyle(color: Colors.grey.shade700),
-      iconColor: Colors.grey.shade600,
-      prefixIconColor: Colors.grey.shade600,
-      suffixIconColor: Colors.grey.shade600,
+    ),
+    inputDecorationTheme: _inputDecorationTheme(
+      FlexThemeData.dark(seedColor: _seedColor).colorScheme,
     ),
   );
 }
