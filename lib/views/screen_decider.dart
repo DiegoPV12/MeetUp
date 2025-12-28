@@ -22,6 +22,7 @@ class _ScreenDeciderState extends State<ScreenDecider> {
       listen: false,
     );
     final isLoggedIn = await deciderViewModel.checkIfLoggedIn();
+    if (!mounted) return;
 
     if (isLoggedIn == true) {
       Navigator.pushReplacementNamed(context, '/home');

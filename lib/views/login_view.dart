@@ -142,6 +142,7 @@ class _LoginViewState extends State<LoginView> {
                                     _emailCtrl.text.trim(),
                                     _passwordCtrl.text.trim(),
                                   );
+                                  if (!mounted) return;
                                   Navigator.pushReplacementNamed(
                                     context,
                                     '/home',

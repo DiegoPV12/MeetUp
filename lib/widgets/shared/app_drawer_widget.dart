@@ -128,8 +128,10 @@ class _AppDrawerWidgetState extends State<AppDrawerWidget> {
 
                   final shouldLogout =
                       await _showLogoutConfirmation(rootContext);
+                  if (!context.mounted) return;
                   if (shouldLogout) {
                     await Future.delayed(const Duration(milliseconds: 300));
+                    if (!context.mounted) return;
                     await authViewModel.logout();
                     Navigator.pushNamedAndRemoveUntil(
                       rootContext,

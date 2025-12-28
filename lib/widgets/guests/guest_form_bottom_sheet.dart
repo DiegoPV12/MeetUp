@@ -35,18 +35,12 @@ void showGuestFormBottomSheet(
             const SizedBox(height: 12),
             TextField(
               controller: nameCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Nombre',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Nombre'),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: emailCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -81,8 +75,10 @@ void showGuestFormBottomSheet(
                     } else {
                       await vm.addGuest(guest);
                     }
-                    if (context.mounted) Navigator.pop(ctx);
+                    if (!context.mounted) return;
+                    Navigator.pop(ctx);
                   } catch (e) {
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Error al guardar invitado'),

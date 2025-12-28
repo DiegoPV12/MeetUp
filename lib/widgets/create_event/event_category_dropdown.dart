@@ -13,11 +13,8 @@ class EventCategoryDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
-      value: selectedCategory,
-      decoration: const InputDecoration(
-        border: OutlineInputBorder(),
-        labelText: 'Categoría',
-      ),
+      initialValue: selectedCategory,
+      decoration: const InputDecoration(labelText: 'Categoría'),
       items: const [
         DropdownMenuItem(value: 'birthday', child: Text('Cumpleaños')),
         DropdownMenuItem(value: 'get-together', child: Text('Junte')),
