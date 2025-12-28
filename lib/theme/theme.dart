@@ -7,44 +7,58 @@ class FontSize {
 }
 
 class AppTheme {
-  // Forzamos el primary exacto
   static const Color _seedColor = Color(0xFF6F2DBD);
   static final ColorScheme _colorScheme = ColorScheme.fromSeed(
     seedColor: _seedColor,
     brightness: Brightness.light,
-  ).copyWith(primary: _seedColor);
+  );
+  static final TextTheme _baseTextTheme = Typography.material2021().black;
+  static final TextTheme _appTextTheme = _baseTextTheme
+      .apply(
+        fontFamily: 'Noto Sans',
+        displayColor: _colorScheme.onSurface,
+        bodyColor: _colorScheme.onSurface,
+      )
+      .copyWith(
+        displayLarge:
+            _baseTextTheme.displayLarge?.copyWith(fontFamily: 'Coolvetica'),
+        displayMedium:
+            _baseTextTheme.displayMedium?.copyWith(fontFamily: 'Coolvetica'),
+        displaySmall:
+            _baseTextTheme.displaySmall?.copyWith(fontFamily: 'Coolvetica'),
+        headlineLarge:
+            _baseTextTheme.headlineLarge?.copyWith(fontFamily: 'Coolvetica'),
+        headlineMedium:
+            _baseTextTheme.headlineMedium?.copyWith(fontFamily: 'Coolvetica'),
+        headlineSmall:
+            _baseTextTheme.headlineSmall?.copyWith(fontFamily: 'Coolvetica'),
+        titleLarge:
+            _baseTextTheme.titleLarge?.copyWith(fontFamily: 'Coolvetica'),
+        titleMedium:
+            _baseTextTheme.titleMedium?.copyWith(fontFamily: 'Coolvetica'),
+        titleSmall:
+            _baseTextTheme.titleSmall?.copyWith(fontFamily: 'Coolvetica'),
+      );
 
   /// Light theme for the app
   static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     colorScheme: _colorScheme,
     fontFamily: 'Noto Sans',
-    textTheme: TextTheme(
-      headlineLarge: const TextStyle(fontFamily: 'Coolvetica', fontSize: 42),
-      headlineMedium: const TextStyle(fontFamily: 'Coolvetica'),
-      headlineSmall: const TextStyle(fontFamily: 'Coolvetica'),
-      titleLarge: const TextStyle(fontFamily: 'Coolvetica'),
-      titleMedium: const TextStyle(fontFamily: 'Coolvetica'),
-      titleSmall: const TextStyle(fontFamily: 'Coolvetica'),
-
-      // Cuerpos con Noto Sans y tamaños definidos
-      bodyLarge: const TextStyle(fontSize: FontSize.bodyLarge),
-      bodyMedium: const TextStyle(fontSize: FontSize.bodyMedium),
-      bodySmall: const TextStyle(fontSize: FontSize.bodySmall),
-    ),
+    textTheme: _appTextTheme,
 
     // FilledButtons (primary actions)
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: _colorScheme.primary,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        minimumSize: const Size(0, 56), // altura fija
-        padding: const EdgeInsets.symmetric(vertical: 18),
+        foregroundColor: _colorScheme.onPrimary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        minimumSize: const Size.fromHeight(56),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
         textStyle: const TextStyle(
           fontFamily: 'Noto Sans',
           fontSize: FontSize.bodyLarge,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
         ),
         elevation: 0,
       ),
@@ -53,15 +67,15 @@ class AppTheme {
     // OutlinedButtons (secondary actions)
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        side: BorderSide(color: _colorScheme.primary, width: 1.0),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        side: BorderSide(color: _colorScheme.outline, width: 1.0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         foregroundColor: _colorScheme.primary,
-        minimumSize: const Size(0, 56),
-        padding: const EdgeInsets.symmetric(vertical: 18),
+        minimumSize: const Size.fromHeight(56),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
         textStyle: const TextStyle(
           fontFamily: 'Noto Sans',
           fontSize: FontSize.bodyLarge,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
         ),
         elevation: 0,
       ),
@@ -69,26 +83,28 @@ class AppTheme {
 
     // Input fields (OutlinedTextFields)
     inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: _colorScheme.surfaceContainerHighest,
       contentPadding: const EdgeInsets.symmetric(
-        vertical: 20,
+        vertical: 16,
         horizontal: 16,
-      ), // aumento vertical
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
+        borderSide: BorderSide(color: _colorScheme.outline, width: 1.0),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
+        borderSide: BorderSide(color: _colorScheme.outline, width: 1.0),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: _colorScheme.primary, width: 1.5),
+        borderSide: BorderSide(color: _colorScheme.primary, width: 2.0),
       ),
-      labelStyle: TextStyle(color: Colors.grey.shade700),
-      iconColor: Colors.grey.shade600,
-      prefixIconColor: Colors.grey.shade600,
-      suffixIconColor: Colors.grey.shade600,
+      labelStyle: TextStyle(color: _colorScheme.onSurfaceVariant),
+      iconColor: _colorScheme.onSurfaceVariant,
+      prefixIconColor: _colorScheme.onSurfaceVariant,
+      suffixIconColor: _colorScheme.onSurfaceVariant,
     ),
   );
 }
