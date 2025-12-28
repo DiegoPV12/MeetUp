@@ -39,7 +39,7 @@ class ChooseEventCreationView extends StatelessWidget {
               ActionCard(
                 title: 'Crear desde cero',
                 subtitle: 'Comienza con un lienzo\nen blanco',
-                buttonLabel: 'CREAR',
+                buttonLabel: 'Crear',
                 onPressed: () => Navigator.pushNamed(context, '/create-event'),
                 backgroundColor: cs.primaryContainer,
                 imagePath: 'assets/images/scratch.png',
@@ -51,7 +51,7 @@ class ChooseEventCreationView extends StatelessWidget {
               ActionCard(
                 title: 'Usar plantilla',
                 subtitle: 'Elige entre opciones\nprediseñadas',
-                buttonLabel: 'PLANTILLA',
+                buttonLabel: 'Plantilla',
                 onPressed:
                     () => Navigator.pushNamed(context, '/create-from-template'),
                 backgroundColor: cs.tertiaryContainer,

@@ -46,6 +46,7 @@ dependencies:
   flutter_svg: ^2.1.0
   flutter_slidable: ^4.0.0
   timelines_plus: ^1.0.6
+  flex_color_scheme: ^7.3.1
 
 dev_dependencies:
   flutter_test:
@@ -81,4 +82,3 @@ flutter:
         - asset: assets/fonts/NotoSans-Italic-VariableFont.ttf
           style: italic  
   uses-material-design: true
-

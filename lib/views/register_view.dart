@@ -208,7 +208,7 @@ class _RegisterViewState extends State<RegisterView> {
                             : Row(
                               mainAxisSize: MainAxisSize.min,
                               children: const [
-                                Text('REGISTRARSE'),
+                                Text('Registrarse'),
                                 SizedBox(width: 8),
                                 Icon(Icons.arrow_forward),
                               ],

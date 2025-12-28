@@ -77,7 +77,7 @@ class _HomeViewState extends State<HomeView> {
               ActionCard(
                 title: 'Crea un Evento!',
                 subtitle: 'Tus primeros pasos',
-                buttonLabel: 'CREAR',
+                buttonLabel: 'Crear',
                 onPressed:
                     () =>
                         Navigator.pushNamed(context, '/choose-event-creation'),
