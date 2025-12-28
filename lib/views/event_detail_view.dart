@@ -242,6 +242,7 @@ class EventDetailView extends StatelessWidget {
                             );
                             if (ok) {
                               await vm.deleteEvent(e.id);
+                              if (!ctx.mounted) return;
                               Navigator.pop(ctx, true);
                             }
                           },

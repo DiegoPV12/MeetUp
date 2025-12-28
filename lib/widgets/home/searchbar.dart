@@ -11,7 +11,6 @@ class SearchBarPlaceholder extends StatelessWidget {
       decoration: InputDecoration(
         hintText: 'Buscar evento…',
         prefixIcon: const Icon(Icons.search),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

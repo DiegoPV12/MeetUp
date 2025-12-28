@@ -181,12 +181,14 @@ class _RegisterViewState extends State<RegisterView> {
                                     _emailCtrl.text.trim(),
                                     _passwordCtrl.text.trim(),
                                   );
+                                  if (!mounted) return;
                                   _showSuccess(
                                     'Registro exitoso, inicia sesión',
                                   );
                                   await Future.delayed(
                                     const Duration(milliseconds: 500),
                                   );
+                                  if (!mounted) return;
                                   Navigator.pop(context);
                                 } catch (_) {
                                   _showError('Error al registrar');
@@ -208,7 +210,7 @@ class _RegisterViewState extends State<RegisterView> {
                             : Row(
                               mainAxisSize: MainAxisSize.min,
                               children: const [
-                                Text('REGISTRARSE'),
+                                Text('Registrarse'),
                                 SizedBox(width: 8),
                                 Icon(Icons.arrow_forward),
                               ],

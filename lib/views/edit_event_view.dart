@@ -69,7 +69,7 @@ class _EditEventScreenState extends State<_EditEventScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const SectionTitle('Editar Evento'),
-        leading: BackButton(color: Theme.of(context).colorScheme.onBackground),
+        leading: BackButton(color: Theme.of(context).colorScheme.onSurface),
       ),
       body:
           (vm.isLoading || !_init)
@@ -249,9 +249,11 @@ class _EditEventScreenState extends State<_EditEventScreen> {
         'endTime': endDt?.toIso8601String(),
         'imageUrl': _image!,
       });
+      if (!mounted) return;
       showMessage(ctx, 'Evento actualizado');
       Navigator.pop(ctx, true);
     } catch (_) {
+      if (!mounted) return;
       showMessage(ctx, 'Error al actualizar', isError: true);
     }
   }

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
-import '../utils/constants.dart';
 
 class DeciderViewModel extends ChangeNotifier {
   final storage = const FlutterSecureStorage();
@@ -18,39 +16,15 @@ class DeciderViewModel extends ChangeNotifier {
     notifyListeners();
 
     final token = await storage.read(key: 'jwt_token');
-
     if (token == null || token.isEmpty) {
       _isLoading = false;
       notifyListeners();
       return false;
     }
 
-    debugPrint(token);
-    final isValid = await _validateToken(token);
-
     _isLoading = false;
     notifyListeners();
 
-    return isValid;
-  }
-
-  Future<bool?> _validateToken(String token) async {
-    try {
-      final response = await http.get(
-        Uri.parse(Constants.meUrl),
-        headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
-      );
-
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        await storage.delete(key: 'jwt_token');
-        return false;
-      }
-    } catch (_) {
-      _hasError = true;
-      notifyListeners();
-      return null;
-    }
+    return true;
   }
 }

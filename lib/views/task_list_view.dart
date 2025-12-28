@@ -91,7 +91,7 @@ class _TaskBoardViewState extends State<TaskBoardView> {
                       labelText: 'Asignar a',
                       prefixIcon: Icon(Icons.person),
                     ),
-                    value: selectedUserId,
+                    initialValue: selectedUserId,
                     items: [
                       const DropdownMenuItem<String>(
                         value: null,
@@ -102,7 +102,7 @@ class _TaskBoardViewState extends State<TaskBoardView> {
                           value: c.id,
                           child: Text('${c.name} (${c.email})'),
                         );
-                      }).toList(),
+                      }),
                     ],
                     onChanged: (value) {
                       selectedUserId = value;
@@ -164,6 +164,7 @@ class _TaskBoardViewState extends State<TaskBoardView> {
                             }
                           }
                         } catch (_) {
+                          if (!ctx.mounted) return;
                           ScaffoldMessenger.of(ctx).showSnackBar(
                             SnackBar(
                               content: Text(

@@ -52,10 +52,7 @@ void showActivityFormBottomSheet(
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nombre',
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: const InputDecoration(labelText: 'Nombre'),
                   validator:
                       (value) =>
                           value == null || value.trim().isEmpty
@@ -65,10 +62,7 @@ void showActivityFormBottomSheet(
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: descController,
-                  decoration: const InputDecoration(
-                    labelText: 'Descripción',
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: const InputDecoration(labelText: 'Descripción'),
                   validator:
                       (value) =>
                           value == null || value.trim().isEmpty
@@ -78,10 +72,7 @@ void showActivityFormBottomSheet(
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: locationController,
-                  decoration: const InputDecoration(
-                    labelText: 'Ubicación',
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: const InputDecoration(labelText: 'Ubicación'),
                   validator:
                       (value) =>
                           value == null || value.trim().isEmpty
@@ -95,10 +86,8 @@ void showActivityFormBottomSheet(
                       child: TextFormField(
                         controller: startController,
                         readOnly: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Hora de inicio',
-                          border: OutlineInputBorder(),
-                        ),
+                        decoration:
+                            const InputDecoration(labelText: 'Hora de inicio'),
                       ),
                     ),
                     IconButton(
@@ -122,10 +111,8 @@ void showActivityFormBottomSheet(
                       child: TextFormField(
                         controller: endController,
                         readOnly: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Hora de fin',
-                          border: OutlineInputBorder(),
-                        ),
+                        decoration:
+                            const InputDecoration(labelText: 'Hora de fin'),
                       ),
                     ),
                     IconButton(
@@ -210,6 +197,7 @@ Future<DateTime?> showDateTimePicker(
     lastDate: DateTime(2100),
   );
   if (date == null) return null;
+  if (!context.mounted) return null;
 
   final time = await showTimePicker(
     context: context,
