@@ -1,30 +1,29 @@
-import 'dart:convert';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
-import '../utils/constants.dart';
+import '../models/event_model.dart';
+import 'showcase_data.dart';
 
 class BudgetService {
-  final _storage = const FlutterSecureStorage();
-
-  Future<String?> _getToken() => _storage.read(key: 'jwt_token');
-
   Future<void> updateBudget(String eventId, double totalBudget) async {
-    final token = await _getToken();
-    final body = jsonEncode({'budget': totalBudget});
-    debugPrint(token);
-
-    final response = await http.put(
-      Uri.parse('${Constants.events}/$eventId'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: body,
-    );
-    debugPrint(response.body);
-    if (response.statusCode != 200) {
-      throw Exception('Error al actualizar presupuesto');
+    final index = ShowcaseData.findEventIndex(eventId);
+    if (index == -1) {
+      throw Exception('Evento no encontrado');
     }
+
+    final event = ShowcaseData.events[index];
+    ShowcaseData.events[index] = EventModel(
+      id: event.id,
+      name: event.name,
+      description: event.description,
+      location: event.location,
+      category: event.category,
+      startTime: event.startTime,
+      endTime: event.endTime,
+      imageUrl: event.imageUrl,
+      createdBy: event.createdBy,
+      isCancelled: event.isCancelled,
+      budget: totalBudget,
+      collaborators: event.collaborators,
+    );
+    debugPrint('Presupuesto actualizado en modo showcase');
   }
 }

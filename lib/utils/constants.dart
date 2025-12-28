@@ -1,6 +1,11 @@
 class Constants {
   // URL Base
-  static const String baseUrl = 'https://meetup-backend-nsxu.onrender.com';
+  // Usa --dart-define=API_BASE_URL para apuntar a otro entorno.
+  // Valor por defecto pensado para ejecución local.
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://localhost:3000',
+  );
 
   // Endpoints completos
   static const String loginUrl = '$baseUrl/api/users/login';

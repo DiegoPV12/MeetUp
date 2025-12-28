@@ -1,139 +1,100 @@
-import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
 import 'package:meetup/models/event_request_model.dart';
 import '../models/event_model.dart';
-import '../utils/constants.dart';
+import 'showcase_data.dart';
 
 class EventService {
-  final _storage = const FlutterSecureStorage();
-
   Future<String> createEvent(EventRequest request) async {
-    final token = await _storage.read(key: 'jwt_token');
-    final body = jsonEncode(request.toJson());
-
-    final res = await http.post(
-      Uri.parse(Constants.events),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: body,
+    final eventId = ShowcaseData.nextEventId();
+    final event = EventModel(
+      id: eventId,
+      name: request.name,
+      description: request.description,
+      location: request.location,
+      category: request.category,
+      startTime: request.startTime,
+      endTime: request.endTime,
+      imageUrl: request.imageUrl,
+      createdBy: ShowcaseData.currentUser.id,
+      budget: 0,
+      collaborators: request.collaborators,
     );
-
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      final decoded = jsonDecode(res.body);
-      final eventId = decoded['data']['_id'];
-      return eventId;
-    } else {
-      throw Exception('Error al crear evento');
-    }
+    ShowcaseData.events.add(event);
+    return eventId;
   }
 
   Future<List<EventModel>> fetchEvents() async {
-    final token = await _storage.read(key: 'jwt_token');
-    if (token == null) throw Exception('No hay token');
-
-    final response = await http.get(
-      Uri.parse(Constants.events),
-      headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body)['data'];
-      return data.map((json) => EventModel.fromJson(json)).toList();
-    } else {
-      throw Exception('Error al obtener eventos');
-    }
+    return List<EventModel>.from(ShowcaseData.events);
   }
 
   Future<EventModel> fetchEventById(String eventId, bool isCollaborator) async {
-    final token = await _storage.read(key: 'jwt_token');
-    if (token == null) throw Exception('No hay token');
-
-    String endpoint = isCollaborator ? '/as-collaborator' : '';
-
-    final response = await http.get(
-      Uri.parse('${Constants.events}/$eventId$endpoint'),
-      headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
-    );
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> decoded = json.decode(response.body);
-      final Map<String, dynamic> data = decoded['data'];
-      return EventModel.fromJson(data);
-    } else {
-      throw Exception('Error al cargar evento');
+    final event = ShowcaseData.findEvent(eventId);
+    if (event == null) {
+      throw Exception('Evento no encontrado');
     }
+    return event;
   }
 
   Future<void> deleteEvent(String eventId) async {
-    final token = await _storage.read(key: 'jwt_token');
-    if (token == null) throw Exception('No hay token');
-
-    final response = await http.delete(
-      Uri.parse('${Constants.events}/$eventId'),
-      headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Error al eliminar evento');
-    }
+    ShowcaseData.events.removeWhere((event) => event.id == eventId);
   }
 
   Future<void> toggleCancelEvent(
     String eventId, {
     required bool isCurrentlyCancelled,
   }) async {
-    final token = await _storage.read(key: 'jwt_token');
-    if (token == null) throw Exception('No hay token');
+    final index = ShowcaseData.findEventIndex(eventId);
+    if (index == -1) return;
 
-    final endpoint = isCurrentlyCancelled ? 'uncancel' : 'cancel';
-
-    final response = await http.patch(
-      Uri.parse('${Constants.events}/$eventId/$endpoint'),
-      headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
+    final event = ShowcaseData.events[index];
+    ShowcaseData.events[index] = EventModel(
+      id: event.id,
+      name: event.name,
+      description: event.description,
+      location: event.location,
+      category: event.category,
+      startTime: event.startTime,
+      endTime: event.endTime,
+      imageUrl: event.imageUrl,
+      createdBy: event.createdBy,
+      isCancelled: !isCurrentlyCancelled,
+      budget: event.budget,
+      collaborators: event.collaborators,
     );
-
-    if (response.statusCode != 200) {
-      throw Exception(
-        'Error al ${isCurrentlyCancelled ? 'reactivar' : 'cancelar'} evento',
-      );
-    }
   }
 
   Future<List<EventModel>> fetchEventsAsCollaborator() async {
-    final token = await _storage.read(key: 'jwt_token');
-    if (token == null) throw Exception('No hay token');
-
-    final response = await http.get(
-      Uri.parse('${Constants.events}/as-collaborator'),
-      headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body)['data'];
-      return data.map((json) => EventModel.fromJson(json)).toList();
-    } else {
-      throw Exception('Error al obtener eventos como colaborador');
-    }
+    return ShowcaseData.events
+        .where((event) => event.collaborators.contains(ShowcaseData.currentUser.id))
+        .toList();
   }
 
   Future<void> updateEvent(
     String eventId,
     Map<String, dynamic> updatedData,
   ) async {
-    final token = await _storage.read(key: 'jwt_token');
-    if (token == null) throw Exception('No hay token');
+    final index = ShowcaseData.findEventIndex(eventId);
+    if (index == -1) return;
 
-    final response = await http.put(
-      Uri.parse('${Constants.events}/$eventId'),
-      headers: {'Authorization': 'Bearer $token', ...Constants.jsonHeaders},
-      body: jsonEncode(updatedData),
+    final event = ShowcaseData.events[index];
+    final startTime = updatedData['startTime'] is String
+        ? DateTime.parse(updatedData['startTime'] as String)
+        : updatedData['startTime'] ?? event.startTime;
+    final endTime = updatedData['endTime'] is String
+        ? DateTime.parse(updatedData['endTime'] as String)
+        : updatedData['endTime'] ?? event.endTime;
+    ShowcaseData.events[index] = EventModel(
+      id: event.id,
+      name: updatedData['name'] ?? event.name,
+      description: updatedData['description'] ?? event.description,
+      location: updatedData['location'] ?? event.location,
+      category: updatedData['category'] ?? event.category,
+      startTime: startTime,
+      endTime: endTime,
+      imageUrl: updatedData['imageUrl'] ?? event.imageUrl,
+      createdBy: event.createdBy,
+      isCancelled: event.isCancelled,
+      budget: updatedData['budget'] ?? event.budget,
+      collaborators: updatedData['collaborators'] ?? event.collaborators,
     );
-
-    if (response.statusCode != 200) {
-      throw Exception('Error al actualizar evento');
-    }
   }
 }
