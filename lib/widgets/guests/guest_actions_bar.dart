@@ -17,7 +17,6 @@ class GuestActionsBar extends StatelessWidget {
               controller: controller,
               decoration: const InputDecoration(
                 labelText: 'Mensaje',
-                border: OutlineInputBorder(),
               ),
               maxLines: 3,
             ),
@@ -49,12 +48,12 @@ class GuestActionsBar extends StatelessWidget {
             if (msg != null) {
               try {
                 await vm.sendInvitations(eventId, msg);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Invitaciones enviadas')),
-                  );
-                }
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Invitaciones enviadas')),
+                );
               } catch (_) {
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Error al enviar invitaciones')),
                 );
@@ -70,12 +69,12 @@ class GuestActionsBar extends StatelessWidget {
             if (msg != null) {
               try {
                 await vm.sendReminders(eventId, msg);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Recordatorios enviados')),
-                  );
-                }
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Recordatorios enviados')),
+                );
               } catch (_) {
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Error al enviar recordatorios'),

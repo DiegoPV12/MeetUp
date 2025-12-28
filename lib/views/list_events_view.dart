@@ -27,11 +27,9 @@ class _ListEventsViewState extends State<ListEventsView> {
   }
 
   Future<void> _refreshEvents() async {
-    await Provider.of<EventViewModel>(context, listen: false).fetchEvents();
-    await Provider.of<EventViewModel>(
-      context,
-      listen: false,
-    ).fetchEventsAsCollaborator();
+    final vm = Provider.of<EventViewModel>(context, listen: false);
+    await vm.fetchEvents();
+    await vm.fetchEventsAsCollaborator();
   }
 
   @override

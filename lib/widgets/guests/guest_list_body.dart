@@ -34,9 +34,6 @@ class GuestListBody extends StatelessWidget {
               isDense: true,
               hintText: 'Buscar invitado...',
               prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
               contentPadding: const EdgeInsets.symmetric(
                 vertical: 12,
                 horizontal: 16,

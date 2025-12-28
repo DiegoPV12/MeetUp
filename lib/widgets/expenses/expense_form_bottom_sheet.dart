@@ -58,17 +58,13 @@ void showExpenseFormBottomSheet(
                     const SizedBox(height: 12),
                     TextField(
                       controller: nameCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Nombre',
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration: const InputDecoration(labelText: 'Nombre'),
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
-                      value: selectedCategory,
+                      initialValue: selectedCategory,
                       decoration: const InputDecoration(
                         labelText: 'Categoría',
-                        border: OutlineInputBorder(),
                       ),
                       items:
                           categories.entries
@@ -89,18 +85,13 @@ void showExpenseFormBottomSheet(
                     TextField(
                       controller: amountCtrl,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Monto',
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration: const InputDecoration(labelText: 'Monto'),
                     ),
                     const SizedBox(height: 10),
                     TextField(
                       controller: descCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Descripción',
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration:
+                          const InputDecoration(labelText: 'Descripción'),
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
@@ -152,8 +143,10 @@ void showExpenseFormBottomSheet(
                                 ),
                               );
                             }
-                            if (context.mounted) Navigator.pop(ctx);
+                            if (!context.mounted) return;
+                            Navigator.pop(ctx);
                           } catch (_) {
+                            if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Error al guardar gasto'),

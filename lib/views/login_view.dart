@@ -142,6 +142,7 @@ class _LoginViewState extends State<LoginView> {
                                     _emailCtrl.text.trim(),
                                     _passwordCtrl.text.trim(),
                                   );
+                                  if (!mounted) return;
                                   Navigator.pushReplacementNamed(
                                     context,
                                     '/home',
@@ -166,7 +167,7 @@ class _LoginViewState extends State<LoginView> {
                             : Row(
                               mainAxisSize: MainAxisSize.min,
                               children: const [
-                                Text('INICIAR SESIÓN'),
+                                Text('Iniciar sesión'),
                                 SizedBox(width: 8),
                                 Icon(Icons.arrow_forward),
                               ],
@@ -184,7 +185,7 @@ class _LoginViewState extends State<LoginView> {
                             () => Navigator.pushNamed(context, '/register'),
                         child: Text.rich(
                           TextSpan(
-                            text: 'REGÍSTRATE',
+                            text: 'Regístrate',
                             style: tt.bodyMedium!.copyWith(
                               color: cs.primary,
                               fontWeight: FontWeight.bold,

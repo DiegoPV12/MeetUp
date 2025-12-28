@@ -116,7 +116,6 @@ class _DateTimeField extends StatelessWidget {
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(icon),
-          border: const OutlineInputBorder(),
         ),
         child: Text(
           valueText,

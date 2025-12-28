@@ -259,7 +259,8 @@ class _IconWidgetState extends AnimatedWidgetBaseState<_IconWidget> {
   Widget build(BuildContext context) {
     final t = _tween!.evaluate(animation);
     return Transform(
-      transform: Matrix4.rotationZ(math.pi * 2 * t)..scale(1 + 0.4 * t),
+      transform:
+          Matrix4.rotationZ(math.pi * 2 * t)..scaleByDouble(1 + 0.4 * t),
       alignment: Alignment.center,
       child: Column(
         mainAxisSize: MainAxisSize.min,

@@ -57,6 +57,7 @@ class _EventBudgetViewState extends State<EventBudgetView>
       return;
     }
     await vm.updateEventBudget(widget.eventId, val);
+    if (!mounted) return;
     // Refrescar también los detalles del evento
     context.read<EventDetailViewModel>().fetchEventDetail(widget.eventId, false);
     if (!mounted) return;
@@ -110,7 +111,6 @@ class _EventBudgetViewState extends State<EventBudgetView>
                     decoration: const InputDecoration(
                       labelText: 'Presupuesto total',
                       prefixIcon: Icon(Icons.attach_money),
-                      border: OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: Spacing.spacingMedium),
@@ -192,9 +192,11 @@ class _EventBudgetViewState extends State<EventBudgetView>
                                         ),
                                   ) ??
                                   false;
+                              if (!context.mounted) return;
 
                               if (ok) {
                                 await expVM.deleteExpense(widget.eventId, e.id);
+                                if (!mounted) return;
                                 _refresh();
 
                                 ScaffoldMessenger.of(context).showSnackBar(
