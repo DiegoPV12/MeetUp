@@ -59,89 +59,109 @@ class AppTheme {
         suffixIconColor: colorScheme.onSurfaceVariant,
       );
 
+  static FlexColorScheme _baseLightScheme() {
+    final seedScheme = ColorScheme.fromSeed(
+      seedColor: _seedColor,
+      brightness: Brightness.light,
+    );
+    return FlexColorScheme.light(
+      colors: FlexSchemeColor.from(
+        primary: seedScheme.primary,
+        secondary: seedScheme.secondary,
+        tertiary: seedScheme.tertiary,
+      ),
+      useMaterial3: true,
+      surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
+      blendLevel: 12,
+      subThemesData: const FlexSubThemesData(
+        filledButtonRadius: 12,
+        outlinedButtonRadius: 12,
+        inputDecoratorBorderType: FlexInputBorderType.none,
+        inputDecoratorRadius: 12,
+      ),
+    );
+  }
+
+  static FlexColorScheme _baseDarkScheme() {
+    final seedScheme = ColorScheme.fromSeed(
+      seedColor: _seedColor,
+      brightness: Brightness.dark,
+    );
+    return FlexColorScheme.dark(
+      colors: FlexSchemeColor.from(
+        primary: seedScheme.primary,
+        secondary: seedScheme.secondary,
+        tertiary: seedScheme.tertiary,
+      ),
+      useMaterial3: true,
+      surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
+      blendLevel: 16,
+      subThemesData: const FlexSubThemesData(
+        filledButtonRadius: 12,
+        outlinedButtonRadius: 12,
+        inputDecoratorBorderType: FlexInputBorderType.none,
+        inputDecoratorRadius: 12,
+      ),
+    );
+  }
+
   /// Light theme for the app
-  static final ThemeData lightTheme = FlexThemeData.light(
-    seedColor: _seedColor,
-    useMaterial3: true,
-    surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-    blendLevel: 12,
-    subThemesData: const FlexSubThemesData(
-      filledButtonRadius: 12,
-      outlinedButtonRadius: 12,
-      inputDecoratorBorderType: FlexInputBorderType.none,
-      inputDecoratorRadius: 12,
-    ),
-    textTheme: _appTextTheme,
-    fontFamily: 'Noto Sans',
-  ).copyWith(
-    filledButtonTheme: FilledButtonThemeData(
-      style: FilledButton.styleFrom(
-        minimumSize: const Size.fromHeight(56),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-        textStyle: const TextStyle(
-          fontFamily: 'Noto Sans',
-          fontSize: FontSize.bodyLarge,
-          fontWeight: FontWeight.w600,
+  static final ThemeData lightTheme = _baseLightScheme().toTheme.copyWith(
+        textTheme: _appTextTheme,
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(56),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            textStyle: const TextStyle(
+              fontFamily: 'Noto Sans',
+              fontSize: FontSize.bodyLarge,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-      ),
-    ),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        minimumSize: const Size.fromHeight(56),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-        textStyle: const TextStyle(
-          fontFamily: 'Noto Sans',
-          fontSize: FontSize.bodyLarge,
-          fontWeight: FontWeight.w600,
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(56),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            textStyle: const TextStyle(
+              fontFamily: 'Noto Sans',
+              fontSize: FontSize.bodyLarge,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-      ),
-    ),
-    inputDecorationTheme: _inputDecorationTheme(
-      FlexThemeData.light(seedColor: _seedColor).colorScheme,
-    ),
-  );
+        inputDecorationTheme:
+            _inputDecorationTheme(_baseLightScheme().toScheme),
+      );
 
   /// Dark theme for the app
-  static final ThemeData darkTheme = FlexThemeData.dark(
-    seedColor: _seedColor,
-    useMaterial3: true,
-    surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-    blendLevel: 16,
-    subThemesData: const FlexSubThemesData(
-      filledButtonRadius: 12,
-      outlinedButtonRadius: 12,
-      inputDecoratorBorderType: FlexInputBorderType.none,
-      inputDecoratorRadius: 12,
-    ),
-    textTheme: _appTextTheme,
-    fontFamily: 'Noto Sans',
-  ).copyWith(
-    filledButtonTheme: FilledButtonThemeData(
-      style: FilledButton.styleFrom(
-        minimumSize: const Size.fromHeight(56),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-        textStyle: const TextStyle(
-          fontFamily: 'Noto Sans',
-          fontSize: FontSize.bodyLarge,
-          fontWeight: FontWeight.w600,
+  static final ThemeData darkTheme = _baseDarkScheme().toTheme.copyWith(
+        textTheme: _appTextTheme,
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(56),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            textStyle: const TextStyle(
+              fontFamily: 'Noto Sans',
+              fontSize: FontSize.bodyLarge,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-      ),
-    ),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        minimumSize: const Size.fromHeight(56),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-        textStyle: const TextStyle(
-          fontFamily: 'Noto Sans',
-          fontSize: FontSize.bodyLarge,
-          fontWeight: FontWeight.w600,
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(56),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            textStyle: const TextStyle(
+              fontFamily: 'Noto Sans',
+              fontSize: FontSize.bodyLarge,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-      ),
-    ),
-    inputDecorationTheme: _inputDecorationTheme(
-      FlexThemeData.dark(seedColor: _seedColor).colorScheme,
-    ),
-  );
+        inputDecorationTheme:
+            _inputDecorationTheme(_baseDarkScheme().toScheme),
+      );
 }
 
 /// Global spacing constants (multiples of 8)

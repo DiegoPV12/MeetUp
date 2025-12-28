@@ -192,6 +192,7 @@ class _EventBudgetViewState extends State<EventBudgetView>
                                         ),
                                   ) ??
                                   false;
+                              if (!context.mounted) return;
 
                               if (ok) {
                                 await expVM.deleteExpense(widget.eventId, e.id);

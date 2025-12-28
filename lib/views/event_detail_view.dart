@@ -224,6 +224,7 @@ class EventDetailView extends StatelessWidget {
                                   ? '¿Reactivar este evento?'
                                   : '¿Cancelar este evento?',
                             );
+                            if (!ctx.mounted) return;
                             if (ok) {
                               await vm.toggleCancelEvent(
                                 e.id,
@@ -240,6 +241,7 @@ class EventDetailView extends StatelessWidget {
                               ctx,
                               '¿Eliminar este evento? Esta acción no se puede deshacer.',
                             );
+                            if (!ctx.mounted) return;
                             if (ok) {
                               await vm.deleteEvent(e.id);
                               if (!ctx.mounted) return;
