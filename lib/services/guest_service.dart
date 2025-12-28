@@ -1,112 +1,50 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
 import '../models/guest_model.dart';
-import '../utils/constants.dart';
+import 'showcase_data.dart';
 
 class GuestService {
-  final _storage = const FlutterSecureStorage();
-
-  Future<String?> _getToken() => _storage.read(key: 'jwt_token');
-
   Future<List<GuestModel>> getGuestsByEvent(String eventId) async {
-    final token = await _getToken();
-    final res = await http.get(
-      Uri.parse('${Constants.guests}/event/$eventId'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-    debugPrint(res.body);
-    final data = jsonDecode(res.body)['data'] as List;
-    return data.map((g) => GuestModel.fromJson(g)).toList();
+    return ShowcaseData.guests
+        .where((guest) => guest.eventId == eventId)
+        .toList();
   }
 
   Future<void> createGuest(GuestModel guest) async {
-    final token = await _getToken();
-    final res = await http.post(
-      Uri.parse(Constants.guests),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(guest.toJson()),
+    ShowcaseData.guests.add(
+      GuestModel(
+        id: ShowcaseData.nextGuestId(),
+        name: guest.name,
+        email: guest.email,
+        status: guest.status,
+        eventId: guest.eventId,
+        createdAt: guest.createdAt,
+        updatedAt: guest.updatedAt,
+        invitationSent: guest.invitationSent,
+        isVip: guest.isVip,
+      ),
     );
-    if (res.statusCode != 200 && res.statusCode != 201) {
-      throw Exception('Error al crear invitado');
-    }
   }
 
   Future<void> updateGuest(GuestModel guest) async {
-    final token = await _getToken();
-    final res = await http.put(
-      Uri.parse('${Constants.guests}/${guest.id}'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'name': guest.name,
-        'email': guest.email,
-        'status': guest.status,
-      }),
-    );
-    if (res.statusCode != 200) {
-      throw Exception('Error al actualizar invitado');
-    }
+    final index =
+        ShowcaseData.guests.indexWhere((existing) => existing.id == guest.id);
+    if (index == -1) return;
+    ShowcaseData.guests[index] = guest;
   }
 
   Future<void> deleteGuest(String id) async {
-    final token = await _getToken();
-    final res = await http.delete(
-      Uri.parse('${Constants.guests}/$id'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-    if (res.statusCode != 200) {
-      throw Exception('Error al eliminar invitado');
-    }
+    ShowcaseData.guests.removeWhere((guest) => guest.id == id);
   }
 
   Future<void> sendInvitations(String eventId, String message) async {
-    final token = await _getToken();
-    final res = await http.post(
-      Uri.parse('${Constants.guests}/$eventId/send-invitations'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({'message': message}),
-    );
-    if (res.statusCode != 200) {
-      throw Exception('Error al enviar invitaciones');
-    }
+    debugPrint('Invitaciones enviadas en modo showcase: $message');
   }
 
   Future<void> sendReminders(String eventId, String message) async {
-    final token = await _getToken();
-    final res = await http.post(
-      Uri.parse('${Constants.guests}/$eventId/send-reminders'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({'message': message}),
-    );
-    if (res.statusCode != 200) {
-      throw Exception('Error al enviar recordatorios');
-    }
+    debugPrint('Recordatorios enviados en modo showcase: $message');
   }
 
   Future<void> sendSingleInvitation(String guestId) async {
-    final token = await _getToken();
-    final res = await http.post(
-      Uri.parse('${Constants.guests}/$guestId/send-invitation'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-    if (res.statusCode != 200) {
-      throw Exception('Error al enviar la invitación');
-    }
+    debugPrint('Invitación individual enviada en modo showcase: $guestId');
   }
 }
